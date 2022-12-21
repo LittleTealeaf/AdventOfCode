@@ -32,7 +32,36 @@ fn part_1() {
     }
 }
 
-fn part_2() {}
+fn part_2() {
+    if let Ok(lines) = read_lines("./input.txt") {
+        let mut score: i32 = 0;
+
+        for line in lines {
+            if let Ok(line) = line {
+                let mut iter = line.as_bytes().iter();
+                let a = *(iter.next().expect("")) as i32 - 'A' as i32;
+                iter.next();
+                let b = *(iter.next().expect("")) as i32 - 'X' as i32;
+
+                score += b * 3;
+
+                if b == 0 {
+                    score += if a == 0 {3} else {(a - 1) % 2 + 1};
+                } else {
+                    if b == 1 {
+                        score += a + 1;
+                    } else {
+                        if b == 2 {
+                            score += (a + 1) % 3 + 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        println!("Part 2: Total score is {score}");
+    }
+}
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
