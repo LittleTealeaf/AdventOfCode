@@ -16,7 +16,7 @@ with open("input.txt") as file:
                 j = grid[y][xp]
                 visibility[y][xp] = True
     for x in range(width):
-        i = -1 
+        i = -1
         j = -1
         for y in range(height):
             yp = height - y - 1
@@ -32,3 +32,21 @@ with open("input.txt") as file:
             if col:
                 count += 1
     print(f"Part 1: Count is {count} ")
+
+    scenic_score_max = 0
+
+    for x in range(1, width-1):
+        for y in range(1, height - 1):
+            tree_height = grid[y][x]
+            score = 1
+            for dx, dy in [(-1, 0), (1, 0), (0, 1), (0, -1)]:
+                for steps in range(1,max(height, width)):
+                    ix = x + dx * steps
+                    iy = y + dy * steps
+                    if ix == 0 or iy == 0 or ix == width - 1 or iy == height - 1 or grid[iy][ix] >= tree_height:
+                        score *= steps
+                        break
+            if score > scenic_score_max:
+                scenic_score_max = score
+
+    print(f"Part 2: Max Scenic Score is {scenic_score_max}")
