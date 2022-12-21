@@ -43,19 +43,14 @@ fn part_2() {
                 iter.next();
                 let b = *(iter.next().expect("")) as i32 - 'X' as i32;
 
-                score += b * 3;
-
-                if b == 0 {
-                    score += if a == 0 {3} else {(a - 1) % 2 + 1};
-                } else {
-                    if b == 1 {
-                        score += a + 1;
+                score += b * 3
+                    + if b == 0 {
+                        (a + 2) % 3 + 1
+                    } else if b == 1 {
+                        a + 1
                     } else {
-                        if b == 2 {
-                            score += (a + 1) % 3 + 1;
-                        }
-                    }
-                }
+                        (a + 1) % 3 + 1
+                    };
             }
         }
 
