@@ -1,45 +1,49 @@
 with open("input.txt") as file:
-    
-    files = {}
-    path = []
-    last_command = ""
 
+    root = {}
+    wd = []
+    
     for line in file.readlines():
-        line = line.replace("\n","")
-        if line[0] == '$':
-            last_command = line
-            if line.startswith('$ cd'):
+        line = line[:-1]
+        if line[0] == "$":
+            if line.startswith("$ cd"):
                 target = line[5:]
                 if target == '/':
-                    path = []
+                    wd = []
                 elif target == '..':
-                    path.pop(-1)
+                    wd.pop(-1)
                 else:
-                    path.append(target)
-        elif last_command == '$ ls':
-            directory = files
-            for name in path:
+                    wd.append(target)
+        else:
+            directory = root
+            for name in wd:
                 directory = directory[name]
             var = line.split(" ")
             if var[0] == 'dir':
                 directory[var[1]] = {}
             else:
                 directory[var[1]] = int(var[0])
-    larger_sizes = 0
 
+    directory_sizes = []
 
-    def find_dir_size(directory):
+    def find_directory_size(directory):
         count = 0
         for value in directory.values():
             if type(value) == int:
                 count += value
             elif type(value) == dict:
-                count += find_dir_size(value)
-        if count < 100000:
-            global larger_sizes
-            larger_sizes += count
+                count += find_directory_size(value)
+        global directory_sizes
+        directory_sizes.append(count)
         return count
+    
+    total_used = find_directory_size(root)
+    free_space = 70000000 - total_used
+    space_needed = 30000000 - free_space 
 
-    find_dir_size(files)
-    print(larger_sizes)
+    part_1 = sum([i for i in directory_sizes if i < 100000])
+    print(f"Part 1: {part_1}")
 
+    part_2 = min([i for i in directory_sizes if i >= space_needed])
+    print(f"Part 2: {part_2}")
+    
