@@ -27,16 +27,17 @@ with open("input.txt") as file:
                 directory[var[1]] = int(var[0])
     larger_sizes = 0
 
+
     def find_dir_size(directory):
         count = 0
-        for value in directory:
+        for value in directory.values():
             if type(value) == int:
                 count += value
-            else:
+            elif type(value) == dict:
                 count += find_dir_size(value)
-        if count > 100000:
+        if count < 100000:
             global larger_sizes
-            larger_sizes += 1
+            larger_sizes += count
         return count
 
     find_dir_size(files)
