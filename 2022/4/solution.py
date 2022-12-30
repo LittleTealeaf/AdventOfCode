@@ -19,5 +19,3 @@ with open("input.txt") as file:
         if (ranges[0][1] >= ranges[1][0] and ranges[0][0] <= ranges[1][1]) or (ranges[1][1] >= ranges[0][0] and ranges[0][1] >= ranges[1][0]):
             count += 1
     print(count)
-        
-
