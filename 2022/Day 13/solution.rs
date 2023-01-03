@@ -1,20 +1,31 @@
-use std::cmp::min;
+use std::cmp::{min, Ordering};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 const FILENAME: &str = "input.txt";
 
 #[derive(Debug)]
-enum Value {
-    Array(Vec<Value>),
+enum Signal {
+    Array(Vec<Signal>),
     Number(usize),
 }
 
-impl Clone for Value {
+impl Signal {
+    fn to_string() -> String {
+        match self {
+            Signal::Array(vec) => {
+                unimplemented!("Formats");
+            },
+            Signal::Number(num) => usize::to_string(&num)
+        }
+    }
+}
+
+impl Clone for Signal {
     fn clone(&self) -> Self {
         match self {
-            Value::Array(a) => Value::Array(a.clone()),
-            Value::Number(a) => Value::Number(a.clone()),
+            Signal::Array(a) => Signal::Array(a.clone()),
+            Signal::Number(a) => Signal::Number(a.clone()),
         }
     }
 }
@@ -28,12 +39,14 @@ enum Compare {
 
 fn main() {
     part_1();
+    part_2();
 }
-fn parse_signal(signal: &str) -> Value {
+
+fn parse_signal(signal: &str) -> Signal {
     if !signal.starts_with("[") {
-        Value::Number(signal.parse().unwrap())
+        Signal::Number(signal.parse().unwrap())
     } else {
-        let mut items: Vec<Value> = Vec::new();
+        let mut items: Vec<Signal> = Vec::new();
         let mut bfr: Vec<char> = Vec::new();
         let mut depth = 0;
         for chr in signal.chars() {
@@ -42,7 +55,7 @@ fn parse_signal(signal: &str) -> Value {
                     items.push(parse_signal(&bfr.iter().collect::<String>()));
                     bfr.clear();
                 } else {
-                    items.push(Value::Array(Vec::new()));
+                    items.push(Signal::Array(Vec::new()));
                 }
             } else if depth != 0 {
                 bfr.push(chr);
@@ -54,17 +67,17 @@ fn parse_signal(signal: &str) -> Value {
                 depth -= 1;
             }
         }
-        Value::Array(items)
+        Signal::Array(items)
     }
 }
 
-fn part_1_compare(a: &Value, b: &Value) -> Compare {
+fn compare_signals(a: &Signal, b: &Signal) -> Compare {
     match a {
-        Value::Array(arr_a) => match b {
-            Value::Array(arr_b) => {
+        Signal::Array(arr_a) => match b {
+            Signal::Array(arr_b) => {
                 let l = min(arr_a.len(), arr_b.len());
                 for i in 0..l {
-                    let comp = part_1_compare(&arr_a[i], &arr_b[i]);
+                    let comp = compare_signals(&arr_a[i], &arr_b[i]);
                     if match comp {
                         Compare::Undetermined => false,
                         _ => true,
@@ -80,29 +93,29 @@ fn part_1_compare(a: &Value, b: &Value) -> Compare {
                     Compare::Unordered
                 }
             }
-            Value::Number(num_b) => {
+            Signal::Number(_) => {
                 if arr_a.len() == 0 {
                     Compare::Ordered
                 } else {
-                    match part_1_compare(&arr_a[0], b) {
+                    match compare_signals(&arr_a[0], b) {
                         Compare::Undetermined | Compare::Unordered => Compare::Unordered,
                         Compare::Ordered => Compare::Ordered,
                     }
                 }
             }
         },
-        Value::Number(num_a) => match b {
-            Value::Array(arr_b) => {
+        Signal::Number(num_a) => match b {
+            Signal::Array(arr_b) => {
                 if arr_b.len() == 0 {
                     Compare::Unordered
                 } else {
-                    match part_1_compare(a, &arr_b[0]) {
+                    match compare_signals(a, &arr_b[0]) {
                         Compare::Undetermined | Compare::Ordered => Compare::Ordered,
                         Compare::Unordered => Compare::Unordered,
                     }
                 }
             }
-            Value::Number(num_b) => {
+            Signal::Number(num_b) => {
                 if num_a == num_b {
                     Compare::Undetermined
                 } else if num_a < num_b {
@@ -127,7 +140,7 @@ fn part_1() {
                 let a = parse_signal(&line_a);
                 let b = parse_signal(&line_b);
 
-                if let Compare::Ordered = part_1_compare(&a, &b) {
+                if let Compare::Ordered = compare_signals(&a, &b) {
                     sum += index;
                 }
                 index += 1;
@@ -141,4 +154,36 @@ fn part_1() {
     }
 
     println!("Part 1: {}", sum);
+}
+
+fn part_2() {
+    let file = File::open(FILENAME).expect("");
+
+    let mut signals: Vec<Signal> = Vec::new();
+    signals.push(parse_signal("[[2]]"));
+    signals.push(parse_signal("[[6]]"));
+
+    for line_result in BufReader::new(file).lines() {
+        if let Ok(line) = line_result {
+            if line.len() > 0 {
+                signals.push(parse_signal(&line));
+            }
+        }
+    }
+
+    
+    signals.sort_by(|a, b| -> Ordering {
+        match compare_signals(&a, &b) {
+            Compare::Ordered => Ordering::Less,
+            Compare::Unordered => Ordering::Greater,
+            Compare::Undetermined => Ordering::Equal
+        }
+    });
+
+    let mut index_2 = -1;
+    let mut index_6 = -1;
+    
+    for i in 0..signals.len() {
+        let sig = signals[i];
+    }
 }
