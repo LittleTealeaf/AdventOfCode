@@ -11,12 +11,22 @@ enum Signal {
 }
 
 impl Signal {
-    fn to_string() -> String {
+    fn to_string(&self) -> String {
         match self {
             Signal::Array(vec) => {
-                unimplemented!("Formats");
-            },
-            Signal::Number(num) => usize::to_string(&num)
+                if vec.len() == 0 {
+                    String::from("[]")
+                } else {
+                    format!(
+                        "[{}]",
+                        vec.iter()
+                            .map(|a| -> String { a.to_string() })
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    )
+                }
+            }
+            Signal::Number(num) => usize::to_string(&num),
         }
     }
 }
@@ -54,7 +64,7 @@ fn parse_signal(signal: &str) -> Signal {
                 if bfr.len() > 0 {
                     items.push(parse_signal(&bfr.iter().collect::<String>()));
                     bfr.clear();
-                } else {
+                } else if depth > 1 {
                     items.push(Signal::Array(Vec::new()));
                 }
             } else if depth != 0 {
@@ -110,7 +120,14 @@ fn compare_signals(a: &Signal, b: &Signal) -> Compare {
                     Compare::Unordered
                 } else {
                     match compare_signals(a, &arr_b[0]) {
-                        Compare::Undetermined | Compare::Ordered => Compare::Ordered,
+                        Compare::Undetermined => {
+                            if arr_b.len() == 1 {
+                                Compare::Undetermined
+                            } else {
+                                Compare::Ordered
+                            }
+                        }
+                        Compare::Ordered => Compare::Ordered,
                         Compare::Unordered => Compare::Unordered,
                     }
                 }
@@ -171,19 +188,34 @@ fn part_2() {
         }
     }
 
-    
+    /*
+    for sig in &signals {
+        println!("{}", sig.to_string());
+    }
+    */
+
     signals.sort_by(|a, b| -> Ordering {
         match compare_signals(&a, &b) {
             Compare::Ordered => Ordering::Less,
             Compare::Unordered => Ordering::Greater,
-            Compare::Undetermined => Ordering::Equal
+            Compare::Undetermined => Ordering::Equal,
         }
     });
 
-    let mut index_2 = -1;
-    let mut index_6 = -1;
-    
+    let mut index_2 = 0;
+    let mut index_6 = 0;
+
     for i in 0..signals.len() {
-        let sig = signals[i];
+        let sig = &signals[i];
+        let string = sig.to_string();
+        println!("{}", string);
+        if index_2 == 0 && string == String::from("[[2]]") {
+            index_2 = i + 1;
+        }
+        if index_6 == 0 && string == String::from("[[6]]") {
+            index_6 = i + 1;
+        }
     }
+
+    println!("Part 2: {} * {} = {}", index_2, index_6, index_2 * index_6);
 }
