@@ -1,3 +1,4 @@
+use std::cmp::{min, max};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -75,10 +76,10 @@ fn parse_scan(file: File, map: &mut Vec<Vec<Tile>>) -> usize {
         }
     }
 
-    x_min -= 2;
-    x_max += 2;
     y_max += 2;
-
+    
+    x_min = min(495 - y_max, x_min);
+    x_max = max(505 + y_max, y_max);
     //let mut map: Vec<Vec<Tile>> = Vec::new();
 
     for _ in 0..y_max {
@@ -130,44 +131,37 @@ fn part_1() {
         let mut x = drop_x;
         let mut y = 0;
 
-
         'fall: while let Some(row_below) = (&map).get(y + 1) {
             match row_below[x] {
                 Tile::Air => {
                     y += 1;
                     continue 'fall;
-                },
-                _ => {
-                    match row_below[(x as isize - 1) as usize] {
-                        Tile::Air => {
-                            y += 1;
-                            x -= 1;
-                            continue 'fall;
-                        },
-                        _ => {
-                            match row_below[x + 1] {
-                                Tile::Air => {
-                                    x += 1;
-                                    y += 1;
-                                    continue 'fall;
-                                },
-                                _ => {
-                                    break 'fall;
-                                }
-                            }
-                        }
-                    }
                 }
+                _ => match row_below[(x as isize - 1) as usize] {
+                    Tile::Air => {
+                        y += 1;
+                        x -= 1;
+                        continue 'fall;
+                    }
+                    _ => match row_below[x + 1] {
+                        Tile::Air => {
+                            x += 1;
+                            y += 1;
+                            continue 'fall;
+                        }
+                        _ => {
+                            break 'fall;
+                        }
+                    },
+                },
             }
         }
 
-
-        if y + 1 == y_max  {
+        if y + 1 == y_max {
             break 'sand;
         }
 
         (&mut map)[y][x] = Tile::Sand;
-
 
         count += 1;
     }
@@ -175,4 +169,55 @@ fn part_1() {
     println!("Part 1: {} units", count);
 }
 
-fn part_2() {}
+fn part_2() {
+    let file = File::open(FILENAME).expect("");
+    let mut map: Vec<Vec<Tile>> = Vec::new();
+    let x_min = parse_scan(file, &mut map);
+    let y_max = map.len();
+
+    let drop_x = 500 - x_min;
+    let mut count = 0;
+
+    'sand: loop {
+        let mut x = drop_x;
+        let mut y = 0;
+
+        'fall: while let Some(row_below) = (&map).get(y + 1) {
+            match row_below[x] {
+                Tile::Air => {
+                    y += 1;
+                    continue 'fall;
+                }
+                _ => match row_below[(x as isize - 1) as usize] {
+                    Tile::Air => {
+                        y += 1;
+                        x -= 1;
+                        continue 'fall;
+                    }
+                    _ => match row_below[x + 1] {
+                        Tile::Air => {
+                            x += 1;
+                            y += 1;
+                            continue 'fall;
+                        }
+                        _ => {
+                            break 'fall;
+                        }
+                    },
+                },
+            }
+        }
+
+        (&mut map)[y][x] = Tile::Sand;
+
+        count += 1;
+
+        if y == 0 {
+            break 'sand;
+        }
+
+    }
+    
+
+    println!("Part 2: {} units", count);
+}
