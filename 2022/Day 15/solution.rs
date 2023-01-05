@@ -68,7 +68,7 @@ fn part_1() {
         let dist = sensor.dist();
         let y_diff = sensor.y.abs_diff(y_target) as isize;
         if y_diff <= dist {
-            for x in (sensor.x - (dist - y_diff))..=(sensor.x + (dist - y_diff)) {
+            for x in (sensor.x - (dist - y_diff))..(sensor.x + (dist - y_diff)) {
                 let i = x - x_min;
                 if !row[i as usize] {
                     count += 1;
@@ -77,7 +77,7 @@ fn part_1() {
             }
         }
     }
-    println!("Part 1: {}", count);
+    println!("Part 1: {} positions", count);
 }
 
 fn part_2() {}
