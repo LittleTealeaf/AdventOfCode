@@ -15,6 +15,10 @@ impl Sensor {
     fn dist(&self) -> isize {
         (self.x - self.b_x).abs() + (self.y - self.b_y).abs()
     }
+
+    fn contains(&self, x: isize, y: isize) -> bool {
+        (self.x - x).abs() + (self.y - y).abs() <= self.dist()
+    }
 }
 
 fn main() {
@@ -80,4 +84,53 @@ fn part_1() {
     println!("Part 1: {} positions", count);
 }
 
-fn part_2() {}
+fn part_2() {
+    let file = File::open(FILENAME).unwrap();
+    let lines = BufReader::new(file).lines();
+
+    let mut sensors: Vec<Sensor> = Vec::new();
+
+    for line in lines {
+        if let Ok(line) = line {
+            let line = line.replace(":", "").replace(",", "");
+            let words: Vec<&str> = line.split(" ").map(|c| -> &str { &c[2..] }).collect();
+            sensors.push(Sensor {
+                x: words[2].parse().unwrap(),
+                y: words[3].parse().unwrap(),
+                b_x: words[8].parse().unwrap(),
+                b_y: words[9].parse().unwrap(),
+            })
+        }
+    }
+
+    let max: isize = 4000000;
+    let mut x: isize = 0;
+    let mut y: isize = 0;
+
+    'y: loop {
+        if y > max {
+            break 'y;
+        }
+
+        'x: loop {
+            if x > max {
+                x = 0;
+                break 'x;
+            }
+            for sensor in &sensors {
+                if sensor.contains(x, y) {
+                    let y_diff = (y - sensor.y).abs();
+
+                    x = sensor.x + (sensor.dist() - y_diff) + 1;
+
+                    continue 'x;
+                }
+            }
+            break 'y;
+        }
+        y += 1;
+    }
+
+    let freq = x * 4000000 + y;
+    println!("Part 2: {}", freq);
+}
