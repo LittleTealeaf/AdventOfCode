@@ -10,8 +10,9 @@ fn main() {
     let part_1_answer = part_1(INPUT);
     println!("Part 1: {} units tall", part_1_answer);
 
-    let part_2_answer = part_2(INPUT);
-    println!("Part 2: {} units tall", part_2_answer);
+    //let part_2_answer = part_2(INPUT);
+    //println!("Part 2: {} units tall", part_2_answer);
+    //
 }
 
 fn part_1(filename: &str) -> i64 {
@@ -37,7 +38,8 @@ fn part_2(filename: &str) -> i64 {
 
     let instructions = parse_instructions(input);
 
-    let height = run_simulation(instructions, 1000000000000);
+    //let height = run_simulation(instructions, 1000000000000);
+    let height = run_simulation(instructions, 1000000);
 
     height
 }
@@ -108,6 +110,19 @@ impl Simulation {
         match self.columns[x].binary_search(&y) {
             Ok(_) => true,
             Err(_) => false,
+        }
+    }
+
+    fn clean(&mut self, threshold: i64) {
+        for x in 0..7 {
+            for (i, val) in self.columns[x].iter().enumerate() {
+                if val > &threshold {
+                    self.columns[x].reverse();
+                    self.columns[x].truncate(self.columns[x].len() - i);
+                    self.columns[x].reverse();
+                    break;
+                }
+            }
         }
     }
 }
@@ -211,12 +226,7 @@ impl Rock {
         let points = match self {
             Rock::Minus => vec![(x, y), (x + 1, y), (x + 2, y), (x + 3, y)],
             Rock::Plus => vec![(x, y + 1), (x + 2, y + 1), (x + 1, y + 2)],
-            Rock::BackL => vec![
-                (x, y),
-                (x + 1, y),
-                (x + 2, y + 1),
-                (x + 2, y + 2),
-            ],
+            Rock::BackL => vec![(x, y), (x + 1, y), (x + 2, y + 1), (x + 2, y + 2)],
             Rock::Vertical => vec![(x, y), (x, y + 1), (x, y + 2), (x, y + 3)],
             Rock::Square => vec![(x, y), (x + 1, y), (x, y + 1), (x + 1, y + 1)],
         };
@@ -236,7 +246,7 @@ fn run_simulation(instructions: Vec<Direction>, rock_count: u64) -> i64 {
     let mut height = 0;
     let mut instr_index = 0;
 
-    for _ in 0..(rock_count) {
+    for i in 0..(rock_count) {
         let mut y = 3 + height;
         let mut x = 2;
         let width = rock.width();
