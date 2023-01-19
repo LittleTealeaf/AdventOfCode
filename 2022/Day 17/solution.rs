@@ -4,7 +4,7 @@ use std::{
     io::{BufRead, BufReader},
 };
 
-const INPUT: &str = "sample.txt";
+const INPUT: &str = "input.txt";
 
 fn main() {
     let part_1_answer = part_1(INPUT);
