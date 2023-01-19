@@ -4,17 +4,17 @@ use std::{
     io::{BufRead, BufReader},
 };
 
-const INPUT: &str = "input.txt";
+const INPUT: &str = "sample.txt";
 
 fn main() {
     let part_1_answer = part_1(INPUT);
-    let part_2_answer = part_2(INPUT);
-
     println!("Part 1: {} units tall", part_1_answer);
+
+    let part_2_answer = part_2(INPUT);
     println!("Part 2: {} units tall", part_2_answer);
 }
 
-fn part_1(filename: &str) -> usize {
+fn part_1(filename: &str) -> i64 {
     let input = {
         let file = File::open(filename).unwrap();
         let mut lines = BufReader::new(file).lines();
@@ -28,7 +28,7 @@ fn part_1(filename: &str) -> usize {
     height
 }
 
-fn part_2(filename: &str) -> usize {
+fn part_2(filename: &str) -> i64 {
     let input = {
         let file = File::open(filename).unwrap();
         let mut lines = BufReader::new(file).lines();
@@ -63,7 +63,55 @@ fn parse_instructions(input: String) -> Vec<Direction> {
     instructions
 }
 
-#[repr(u8)]
+struct Simulation {
+    columns: [Vec<i64>; 7],
+}
+
+impl Simulation {
+    fn new() -> Simulation {
+        Simulation {
+            columns: [
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            ],
+        }
+    }
+
+    fn put_rock(&mut self, x: usize, y: i64) {
+        //dbg!(&self.columns[x]);
+        let len = self.columns[x].len();
+
+        if len == 0 {
+            self.columns[x].push(y);
+        } else {
+            for i in 0..len {
+                if let Some(&v) = self.columns[x].get(i) {
+                    if v == y {
+                        return;
+                    }
+                    if v > y {
+                        self.columns[x].insert(i, y);
+                        return;
+                    }
+                }
+            }
+            self.columns[x].push(y);
+        }
+    }
+
+    fn get(&self, x: usize, y: i64) -> bool {
+        match self.columns[x].binary_search(&y) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+}
+
 #[derive(Debug)]
 enum Rock {
     Minus,
@@ -74,7 +122,7 @@ enum Rock {
 }
 
 impl Rock {
-    fn height(&self) -> usize {
+    fn height(&self) -> i64 {
         match self {
             Rock::Minus => 1,
             Rock::Plus | Rock::BackL => 3,
@@ -92,84 +140,45 @@ impl Rock {
         }
     }
 
-    fn can_fall(&self, sim: &Vec<[bool; 7]>, x: usize, y: usize) -> bool {
+    fn can_fall(&self, sim: &Simulation, x: usize, y: i64) -> bool {
         if y == 0 {
             return false;
         }
         match self {
             Rock::Minus => {
-                let row = sim.get(y - 1).unwrap();
-
-                if row[x] || row[x + 1] || row[x + 2] || row[x + 3] {
-                    return false;
-                }
-                return true;
+                !(sim.get(x, y - 1)
+                    || sim.get(x + 1, y - 1)
+                    || sim.get(x + 2, y - 1)
+                    || sim.get(x + 3, y - 1))
             }
-            Rock::Plus => {
-                let row = sim.get(y - 1).unwrap();
-                if row[x + 1] {
-                    return false;
-                }
-
-                let row = sim.get(y).unwrap();
-                if row[x] || row[x + 2] {
-                    return false;
-                }
-
-                true
-            }
-            Rock::BackL => {
-                let row = sim.get(y - 1).unwrap();
-                if row[x] || row[x + 1] || row[x + 2] {
-                    return false;
-                }
-
-                true
-            }
-            Rock::Vertical => {
-                let row = sim.get(y - 1).unwrap();
-                if row[x] {
-                    return false;
-                }
-                true
-            }
-            Rock::Square => {
-                let row = sim.get(y - 1).unwrap();
-                if row[x] || row[x + 1] {
-                    return false;
-                }
-                true
-            }
+            Rock::Plus => !(sim.get(x, y) || sim.get(x + 2, y) || sim.get(x + 1, y - 1)),
+            Rock::BackL => !(sim.get(x, y - 1) || sim.get(x + 1, y - 1) || sim.get(x + 2, y - 1)),
+            Rock::Vertical => !sim.get(x, y - 1),
+            Rock::Square => !(sim.get(x, y - 1) || sim.get(x + 1, y - 1)),
         }
     }
 
-    fn can_move(&self, direction: &Direction, sim: &Vec<[bool; 7]>, x: usize, y: usize) -> bool {
+    fn can_move(&self, direction: &Direction, sim: &Simulation, x: usize, y: i64) -> bool {
         match direction {
             Direction::Left => {
                 if x == 0 {
                     false
                 } else {
                     match self {
-                        Rock::Minus => !sim.get(y).unwrap()[x - 1],
+                        Rock::Minus => !sim.get(x + 1, y),
                         Rock::Plus => {
-                            !(sim.get(y).unwrap()[x]
-                                || sim.get(y + 1).unwrap()[x - 1]
-                                || sim.get(y + 2).unwrap()[x])
+                            !(sim.get(x, y) || sim.get(x, y + 2) || sim.get(x - 1, y + 1))
                         }
                         Rock::BackL => {
-                            !(sim.get(y).unwrap()[x - 1]
-                                || sim.get(y + 1).unwrap()[x + 1]
-                                || sim.get(y + 2).unwrap()[x + 1])
+                            !(sim.get(x - 1, y) || sim.get(x + 1, y + 1) || sim.get(x + 1, y + 2))
                         }
                         Rock::Vertical => {
-                            !(sim.get(y).unwrap()[x - 1]
-                                || sim.get(y + 1).unwrap()[x - 1]
-                                || sim.get(y + 2).unwrap()[x - 1]
-                                || sim.get(y + 3).unwrap()[x - 1])
+                            !(sim.get(x - 1, y)
+                                || sim.get(x - 1, y + 1)
+                                || sim.get(x - 1, y + 2)
+                                || sim.get(x - 1, y + 3))
                         }
-                        Rock::Square => {
-                            !(sim.get(y).unwrap()[x - 1] || sim.get(y + 1).unwrap()[x - 1])
-                        }
+                        Rock::Square => !(sim.get(x - 1, y) || sim.get(x - 1, y + 1)),
                     }
                 }
             }
@@ -178,82 +187,50 @@ impl Rock {
                     false
                 } else {
                     match self {
-                        Rock::Minus => !sim.get(y).unwrap()[x + 4],
+                        Rock::Minus => !sim.get(x + 4, y),
                         Rock::Plus => {
-                            !(sim.get(y).unwrap()[x + 2]
-                                || sim.get(y + 1).unwrap()[x + 3]
-                                || sim.get(y + 2).unwrap()[x + 2])
+                            !(sim.get(x + 2, y) || sim.get(x + 3, y + 1) || sim.get(x + 2, y + 2))
                         }
                         Rock::BackL => {
-                            !(sim.get(y).unwrap()[x + 3]
-                                || sim.get(y + 1).unwrap()[x + 3]
-                                || sim.get(y + 2).unwrap()[x + 3])
+                            !(sim.get(x + 3, y) || sim.get(x + 3, y + 1) || sim.get(x + 3, y + 2))
                         }
                         Rock::Vertical => {
-                            !(sim.get(y).unwrap()[x + 1]
-                                || sim.get(y + 1).unwrap()[x + 1]
-                                || sim.get(y + 2).unwrap()[x + 1]
-                                || sim.get(y + 3).unwrap()[x + 1])
+                            !(sim.get(x + 1, y)
+                                || sim.get(x + 1, y + 1)
+                                || sim.get(x + 1, y + 2)
+                                || sim.get(x + 1, y + 3))
                         }
-                        Rock::Square => {
-                            !(sim.get(y).unwrap()[x + 2] || sim.get(y + 1).unwrap()[x + 2])
-                        }
+                        Rock::Square => !(sim.get(x + 2, y) || sim.get(x + 2, y + 1)),
                     }
                 }
             }
         }
     }
 
-    fn place(&self, sim: &mut Vec<[bool; 7]>, x: usize, y: usize) -> usize {
-        match self {
-            Rock::Minus => {
-                let row = sim.get_mut(y).unwrap();
-                row[x] = true;
-                row[x + 1] = true;
-                row[x + 2] = true;
-                row[x + 3] = true;
-            }
-            Rock::Plus => {
-                let row = sim.get_mut(y).unwrap();
-                row[x + 1] = true;
-                let row = sim.get_mut(y + 1).unwrap();
-                row[x] = true;
-                row[x + 1] = true;
-                row[x + 2] = true;
-                let row = sim.get_mut(y + 2).unwrap();
-                row[x + 1] = true;
-            }
-            Rock::BackL => {
-                let row = sim.get_mut(y).unwrap();
-                row[x] = true;
-                row[x + 1] = true;
-                row[x + 2] = true;
-                let row = sim.get_mut(y + 1).unwrap();
-                row[x + 2] = true;
-                let row = sim.get_mut(y + 2).unwrap();
-                row[x + 2] = true;
-            }
-            Rock::Vertical => {
-                for i in 0..4 {
-                    let row = sim.get_mut(y + i).unwrap();
-                    row[x] = true;
-                }
-            }
-            Rock::Square => {
-                for i in 0..2 {
-                    let row = sim.get_mut(y + i).unwrap();
-                    row[x] = true;
-                    row[x + 1] = true;
-                }
-            }
+    fn place(&self, simulation: &mut Simulation, x: usize, y: i64) -> i64 {
+        let points = match self {
+            Rock::Minus => vec![(x, y), (x + 1, y), (x + 2, y), (x + 3, y)],
+            Rock::Plus => vec![(x + 1, y), (x, y + 1), (x + 2, y + 1), (x + 1, y + 2)],
+            Rock::BackL => vec![
+                (x, y),
+                (x + 1, y),
+                (x + 2, y),
+                (x + 2, y + 1),
+                (x + 2, y + 2),
+            ],
+            Rock::Vertical => vec![(x, y), (x, y + 1), (x, y + 2), (x, y + 3)],
+            Rock::Square => vec![(x, y), (x + 1, y), (x, y + 1), (x + 1, y + 1)],
+        };
+        for (x, y) in points {
+            simulation.put_rock(x, y);
         }
 
         y + self.height()
     }
 }
 
-fn run_simulation(instructions: Vec<Direction>, rock_count: u64) -> usize {
-    let mut sim = Vec::new();
+fn run_simulation(instructions: Vec<Direction>, rock_count: u64) -> i64 {
+    let mut sim = Simulation::new();
     let instr_len = instructions.len();
 
     let mut rock = Rock::Minus;
@@ -261,24 +238,11 @@ fn run_simulation(instructions: Vec<Direction>, rock_count: u64) -> usize {
     let mut instr_index = 0;
 
     for _ in 0..(rock_count) {
-        while sim.len() < 3 + height + rock.height() {
-            sim.push([false; 7]);
-        }
-
         let mut y = 3 + height;
         let mut x = 2;
-
         let width = rock.width();
 
-        let mut move_down = false;
-
-        while rock.can_fall(&sim, x, y) {
-            if move_down {
-                y -= 1;
-            } else {
-                move_down = true;
-            }
-
+        loop {
             let jet = instructions.get(instr_index).unwrap();
             instr_index = (instr_index + 1) % instr_len;
 
@@ -292,6 +256,12 @@ fn run_simulation(instructions: Vec<Direction>, rock_count: u64) -> usize {
                     }
                 }
             }
+
+            if !rock.can_fall(&sim, x, y) {
+                break;
+            }
+
+            y -= 1;
         }
 
         let h = rock.place(&mut sim, x, y);
