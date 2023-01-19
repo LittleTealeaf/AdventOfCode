@@ -210,11 +210,10 @@ impl Rock {
     fn place(&self, simulation: &mut Simulation, x: usize, y: i64) -> i64 {
         let points = match self {
             Rock::Minus => vec![(x, y), (x + 1, y), (x + 2, y), (x + 3, y)],
-            Rock::Plus => vec![(x + 1, y), (x, y + 1), (x + 2, y + 1), (x + 1, y + 2)],
+            Rock::Plus => vec![(x, y + 1), (x + 2, y + 1), (x + 1, y + 2)],
             Rock::BackL => vec![
                 (x, y),
                 (x + 1, y),
-                (x + 2, y),
                 (x + 2, y + 1),
                 (x + 2, y + 2),
             ],
