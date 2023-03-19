@@ -1,19 +1,35 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader, Error};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+    num::ParseIntError,
+};
+
+#[derive(Debug)]
+enum ParseError {
+    InvalidTokenLength,
+    IntError(ParseIntError),
+}
+
+impl From<ParseIntError> for ParseError {
+    fn from(value: ParseIntError) -> Self {
+        ParseError::IntError(value)
+    }
+}
 
 struct Point {
     x: usize,
     y: usize,
 }
 
-impl From<&str> for Point {
-    fn from(value: &str) -> Self {
-        let values: Vec<&str> = value.split(",").collect();
+impl TryFrom<&str> for Point {
+    type Error = ParseError;
 
-        Self {
-            x: values[0].parse().unwrap(),
-            y: values[0].parse().unwrap(),
-        }
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let tokens = value.split(",").collect::<Vec<_>>();
+        Ok(Point {
+            x: tokens[0].parse()?,
+            y: tokens[1].parse()?,
+        })
     }
 }
 
@@ -28,61 +44,107 @@ struct Instruction {
     to: Point,
 }
 
-impl From<String> for Instruction {
-    fn from(value: String) -> Self {
-        let words: Vec<&str> = value.split(" ").collect();
+impl TryFrom<String> for Instruction {
+    type Error = ParseError;
 
-        let action = {
-            if words[0].eq("toggle") {
-                Action::Toggle
-            } else {
-                Action::Set(words[1].eq("on"))
-            }
-        };
-
-        let offset = match action {
-            Action::Set(_) => 2,
-            Action::Toggle => 1,
-        };
-
-        let from = Point::from(words[offset]);
-        let to = Point::from(words[offset + 2]);
-
-        Self { action, from, to }
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let tokens = value.split(" ").collect::<Vec<_>>();
+        match tokens.len() {
+            4 => Ok(Self {
+                action: Action::Toggle,
+                from: Point::try_from(tokens[1])?,
+                to: Point::try_from(tokens[3])?,
+            }),
+            5 => Ok(Self {
+                action: Action::Set(tokens[1].eq("on")),
+                from: Point::try_from(tokens[2])?,
+                to: Point::try_from(tokens[4])?,
+            }),
+            _ => Err(ParseError::InvalidTokenLength),
+        }
     }
 }
 
-fn part_1(fileName: &str) -> Result<u64, Error> {
-    let file = File::open(fileName)?;
-    let lines = BufReader::new(file).lines();
+fn main() {
+    {
+        let file = File::open("input.txt").unwrap();
+        let instructions = BufReader::new(file)
+            .lines()
+            .into_iter()
+            .map(Result::unwrap)
+            .map(Instruction::try_from)
+            .map(Result::unwrap)
+            .collect::<Vec<_>>();
+        println!("Part 1: {}", part_1(instructions))
+    }
+    {
+        let file = File::open("input.txt").unwrap();
+        let instructions = BufReader::new(file)
+            .lines()
+            .into_iter()
+            .map(Result::unwrap)
+            .map(Instruction::try_from)
+            .map(Result::unwrap)
+            .collect::<Vec<_>>();
+        println!("Part 2: {}", part_2(instructions))
+    }
+}
 
-    let instructions = lines.map(|line| -> Instruction { Instruction::from(line.unwrap()) });
-
+fn part_1(instructions: Vec<Instruction>) -> usize {
     let mut state = [[false; 1000]; 1000];
 
     for instruction in instructions {
         for x in (instruction.from.x)..=(instruction.to.x) {
             for y in (instruction.from.y)..=(instruction.to.y) {
-                match instruction.action {
-                    Action::Set(value) => state[y][x] = value,
-                    Action::Toggle => state[y][x] = !state[y][x]
+                state[y][x] = match instruction.action {
+                    Action::Toggle => !state[y][x],
+                    Action::Set(value) => value,
                 }
             }
         }
     }
 
-    let mut count = 0;
-    for row in state {
-        for value in row {
-            if value {
-                count += 1;
+    let mut total = 0;
+    for y in 0..1000 {
+        for x in 0..1000 {
+            if state[y][x] {
+                total += 1;
             }
         }
     }
 
-    Ok(count)
+    total
 }
+fn part_2(instructions: Vec<Instruction>) -> i64 {
+    let mut state = [[0; 1000]; 1000];
 
-fn main() {
-    println!("Part 1: {}", part_1("input.txt").unwrap());
+    for instruction in instructions {
+        for x in (instruction.from.x)..=(instruction.to.x) {
+            for y in (instruction.from.y)..=(instruction.to.y) {
+                state[y][x] = i64::max(
+                    0,
+                    state[y][x]
+                        + match instruction.action {
+                            Action::Toggle => 2,
+                            Action::Set(value) => {
+                                if value {
+                                    1
+                                } else {
+                                    -1
+                                }
+                            }
+                        },
+                )
+            }
+        }
+    }
+
+    let mut total = 0;
+    for y in 0..1000 {
+        for x in 0..1000 {
+            total += state[y][x];
+        }
+    }
+
+    total
 }
