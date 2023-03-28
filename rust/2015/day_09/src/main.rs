@@ -123,7 +123,7 @@ fn part_1(routes: Vec<Route>) -> i32 {
             }
             continue;
         }
-        
+
         let mut nodes_clone = snapshot.nodes_left.clone();
 
         for next in snapshot.nodes_left {
@@ -131,14 +131,77 @@ fn part_1(routes: Vec<Route>) -> i32 {
             nodes_clone.remove(index);
             snapshots.push(Snapshot {
                 current_node: next,
-                distance_traveled: (snapshot.distance_traveled + distances[next][snapshot.current_node]),
-                nodes_left: nodes_clone.clone()
+                distance_traveled: (snapshot.distance_traveled
+                    + distances[next][snapshot.current_node]),
+                nodes_left: nodes_clone.clone(),
             });
             nodes_clone.push(next);
         }
     }
 
     min_distance
+}
+
+fn part_2(routes: Vec<Route>) -> i32 {
+    let (mut edges, node_count) = convert_routes_to_edges(routes);
+    edges.sort_by_key(|edge| -> i32 { edge.distance });
+
+    let mut distances: Vec<Vec<i32>> = Vec::new();
+
+    for _ in 0..node_count {
+        let mut vec = Vec::new();
+        for _ in 0..node_count {
+            vec.push(-1);
+        }
+        distances.push(vec);
+    }
+
+    for edge in edges {
+        let [start, end] = edge.endpoints;
+        distances[start][end] = edge.distance;
+        distances[end][start] = edge.distance;
+    }
+
+    let mut snapshots = (0..node_count)
+        .into_iter()
+        .map(|node| -> Snapshot {
+            let nodes_left = (0..node_count)
+                .filter(|i| -> bool { i != &node })
+                .collect::<Vec<_>>();
+            Snapshot {
+                current_node: node,
+                distance_traveled: 0,
+                nodes_left,
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let mut max_distance = -1;
+
+    while let Some(snapshot) = snapshots.pop() {
+        if snapshot.nodes_left.len() == 0 {
+            if max_distance < snapshot.distance_traveled {
+                max_distance = snapshot.distance_traveled;
+            }
+            continue;
+        }
+
+        let mut nodes_clone = snapshot.nodes_left.clone();
+
+        for next in snapshot.nodes_left {
+            let index = index_of(&nodes_clone, &next).unwrap();
+            nodes_clone.remove(index);
+            snapshots.push(Snapshot {
+                current_node: next,
+                distance_traveled: (snapshot.distance_traveled
+                    + distances[next][snapshot.current_node]),
+                nodes_left: nodes_clone.clone(),
+            });
+            nodes_clone.push(next);
+        }
+    }
+
+    max_distance
 }
 
 fn main() {
@@ -152,6 +215,18 @@ fn main() {
             .collect::<Vec<_>>();
         let result = part_1(edges);
         println!("Part 1: {}", result);
+    }
+
+    {
+        let file = File::open("input.txt").unwrap();
+        let edges = BufReader::new(file)
+            .lines()
+            .into_iter()
+            .map(Result::unwrap)
+            .map(Route::from)
+            .collect::<Vec<_>>();
+        let result = part_2(edges);
+        println!("Part 2: {}", result);
     }
 }
 
@@ -176,5 +251,24 @@ mod tests {
         let value = part_1(edges);
 
         assert_eq!(value, 605);
+    }
+
+    #[test]
+    fn test_part_2() {
+        let strings = vec![
+            "London to Dublin = 464",
+            "London to Belfast = 518",
+            "Dublin to Belfast = 141",
+        ];
+
+        let edges = strings
+            .into_iter()
+            .map(String::from)
+            .map(Route::from)
+            .collect::<Vec<_>>();
+
+        let value = part_2(edges);
+
+        assert_eq!(value, 982);
     }
 }
