@@ -1,8 +1,14 @@
 fn main() {
     {
         let input = vec![1, 3, 2, 1, 1, 3, 1, 1, 1, 2];
-        let value = part_1(input, 40);
+        let value = apply_sequence(input, 40);
         println!("Part 1: {}", value);
+    }
+
+    {
+        let input = vec![1, 3, 2, 1, 1, 3, 1, 1, 1, 2];
+        let value = apply_sequence(input, 50);
+        println!("Part 2: {}", value);
     }
 }
 
@@ -20,7 +26,7 @@ fn number_to_array(value: usize) -> Vec<u8> {
     array
 }
 
-fn part_1(state: Vec<u8>, steps: usize) -> usize {
+fn apply_sequence(state: Vec<u8>, steps: usize) -> usize {
     let mut state = state;
 
     for _ in 0..steps {
@@ -61,7 +67,7 @@ mod tests {
     #[test]
     fn test_part_1() {
         let input = vec![1];
-        let value = part_1(input, 5);
+        let value = apply_sequence(input, 5);
         assert_eq!(value, 6);
     }
 }
