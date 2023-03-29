@@ -1,7 +1,6 @@
 use std::{
     fs::File,
     io::{BufRead, BufReader},
-    ops::Index,
 };
 
 #[derive(Debug, Clone)]
@@ -27,12 +26,6 @@ impl From<String> for Route {
 struct Edge {
     endpoints: [usize; 2],
     distance: i32,
-}
-
-impl Edge {
-    fn has_node(&self, node: usize) -> bool {
-        self.endpoints[0] == node || self.endpoints[1] == node
-    }
 }
 
 fn index_of<T: PartialEq>(array: &Vec<T>, item: &T) -> Option<usize> {
