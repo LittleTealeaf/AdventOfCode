@@ -69,7 +69,7 @@ fn part_1(input: Vec<PromptLine>) -> usize {
                     path.clear();
                 }
             },
-            PromptLine::File(name, size) => {
+            PromptLine::File(_, size) => {
                 let path = path.clone();
                 for i in 1..=path.len() {
                     let sub_path = &path[0..i];
