@@ -1,3 +1,4 @@
 .ccls-cache
 **/a.out
 **/solution
+**/rust/target/**
