@@ -16,8 +16,6 @@ pub fn part_2(number: i64) -> i64 {
         for i in 0..layer_size {
             let mut value = layer_values.last().unwrap_or(&0).clone();
 
-            
-
             if dist == 0 {
                 change = 1;
             } else if dist == layer - 1 {
