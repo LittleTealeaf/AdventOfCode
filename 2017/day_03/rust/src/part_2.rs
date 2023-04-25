@@ -91,14 +91,6 @@ pub fn part_2(number: i64) -> i64 {
     }
 }
 
-fn calculate_layer_size(layer: i64) -> i64 {
-    let prev_length = (layer - 1) * 2 - 1;
-    let prev_area = prev_length * prev_length;
-    let length = layer * 2 - 1;
-    let area = length * length;
-    area - prev_area
-}
-
 #[test]
 fn test_part_2() {
     let actual_values = [
