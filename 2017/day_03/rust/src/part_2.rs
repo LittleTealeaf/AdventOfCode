@@ -1,31 +1,96 @@
+struct Layer {
+    sides: [Vec<i64>; 4],
+    corners: [i64; 4],
+}
+
+impl Layer {
+    fn second_layer() -> Self {
+        Self {
+            sides: [vec![1], vec![4], vec![10], vec![23]],
+            corners: [2, 5, 11, 25],
+        }
+    }
+
+    fn new(layer: usize) -> Self {
+        Self {
+            sides: [
+                vec![0; layer],
+                vec![0; layer],
+                vec![0; layer],
+                vec![0; layer],
+            ],
+            corners: [0, 0, 0, 0],
+        }
+    }
+}
+
+const FIRST_NINE_VALUES: [i64; 9] = [1, 1, 2, 4, 5, 10, 11, 23, 25];
+
 pub fn part_2(number: i64) -> i64 {
-    let mut previous_layer = vec![1];
-    let mut layer = 2;
+    for value in FIRST_NINE_VALUES {
+        if value > number {
+            return value;
+        }
+    }
 
-    // loop {
-    //     previous_layer.reverse();
-    //     let mut layer_values: Vec<i64> = Vec::new();
-    //
-    //     let mut prev_layer_buffer: Vec<i64> = Vec::new();
-    //     prev_layer_buffer.push(*previous_layer.last().unwrap());
-    //
-    //     let layer_size = calculate_layer_size(layer);
-    //     let mut dist = layer - 2;
-    //     let mut change = -1;
-    //
-    //     for i in 0..layer_size {
-    //         let mut value = layer_values.last().unwrap_or(&0).clone();
-    //
-    //         if dist == 0 {
-    //             change = 1;
-    //         } else if dist == layer - 1 {
-    //             change = -1;
-    //         }
-    //         dist += change;
-    //     }
-    // }
+    let mut layer_prev = Layer::second_layer();
+    let mut index = 3;
 
-    0
+    loop {
+        // -3, -1, 1, 3, 5, 7,
+        let side_length = index * 2 - 3;
+        let mut layer = Layer::new(side_length);
+
+        for side in 0..4 {
+            let mut value =
+                *layer.sides[(side + 3) % 4].last().unwrap() + layer.corners[(side + 3) % 4];
+            for i in 0..side_length {
+                if i < 2 {
+                    value += layer_prev.corners[(side + 3) % 4];
+                }
+
+                if i < side_length - 2 {
+                    value += layer_prev.sides[side][i];
+                }
+
+                if i < side_length - 1 && i > 0 {
+                    value += layer_prev.sides[side][i - 1];
+                }
+
+                if i < side_length && i > 1 {
+                    value += layer_prev.sides[side][i - 2];
+                }
+
+                if i > side_length - 3 {
+                    value += layer_prev.corners[side];
+                }
+
+                if i > side_length - 2 {
+                    value += layer.sides[(side + 1) % 4][0];
+                }
+
+                if value > number {
+                    return value;
+                }
+
+                layer.sides[side][i] = value;
+            }
+
+            value += layer_prev.corners[side];
+            value += layer.sides[(side + 1) % 4][0];
+
+            if value > number {
+                return value;
+            }
+
+            layer.corners[side] = value;
+            
+            
+        }
+
+        index += 1;
+        layer_prev = layer;
+    }
 }
 
 fn calculate_layer_size(layer: i64) -> i64 {
