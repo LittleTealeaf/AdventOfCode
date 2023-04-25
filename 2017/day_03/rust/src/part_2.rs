@@ -84,8 +84,6 @@ pub fn part_2(number: i64) -> i64 {
             }
 
             layer.corners[side] = value;
-            
-            
         }
 
         index += 1;
