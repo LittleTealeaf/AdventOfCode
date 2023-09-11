@@ -55,7 +55,7 @@ func part_2(report []int) int {
 	prev := report[0] + report[1] + report[2]
 	number_increasing := 0
 
-	for i := 3; i < len(report)-2; i++ {
+	for i := 1; i < len(report)-2; i++ {
 
 		value := report[i] + report[i+1] + report[i+2]
 		if value > prev {
