@@ -49,25 +49,24 @@ func part_1(elves [][]int) int {
 	return max
 }
 
-
 func part_2(elves [][]int) int {
-	leaders := []int {0,0,0}
+	leaders := []int{0, 0, 0}
 	for _, elf := range elves {
 		sum := 0
 		for _, item := range elf {
 			sum += item
 		}
 		switch {
-			case leaders[0] < sum:
-				leaders[2] = leaders[1]
-				leaders[1] = leaders[0]
-				leaders[0] = sum
-			case leaders[1] < sum:
-				leaders[2] = leaders[1]
-				leaders[1] = sum
-			case leaders[2] < sum:
-				leaders[2] = sum
-			default:
+		case leaders[0] < sum:
+			leaders[2] = leaders[1]
+			leaders[1] = leaders[0]
+			leaders[0] = sum
+		case leaders[1] < sum:
+			leaders[2] = leaders[1]
+			leaders[1] = sum
+		case leaders[2] < sum:
+			leaders[2] = sum
+		default:
 
 		}
 	}
