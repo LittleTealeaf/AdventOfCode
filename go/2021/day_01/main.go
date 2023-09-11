@@ -7,7 +7,6 @@ import (
 	"strconv"
 )
 
-
 func main() {
 	fileBuffer, err := os.Open("../../../inputs/2021/01/input.txt")
 	if err != nil {
@@ -32,16 +31,15 @@ func main() {
 	fileBuffer.Close()
 
 	fmt.Println("Part 1", part_1(report))
-
+	fmt.Println("Part 2", part_2(report))
 }
-
 
 func part_1(report []int) int {
 	prev := report[0]
 	l := len(report)
 
 	number_increasing := 0
-	
+
 	for i := 1; i < l; i++ {
 		value := report[i]
 		if value > prev {
@@ -53,3 +51,18 @@ func part_1(report []int) int {
 	return number_increasing
 }
 
+func part_2(report []int) int {
+	prev := report[0] + report[1] + report[2]
+	number_increasing := 0
+
+	for i := 3; i < len(report)-2; i++ {
+
+		value := report[i] + report[i+1] + report[i+2]
+		if value > prev {
+			number_increasing++
+		}
+		prev = value
+	}
+
+	return number_increasing
+}
