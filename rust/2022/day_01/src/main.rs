@@ -1,9 +1,7 @@
 type InputType = Vec<Vec<u32>>;
 
 fn parse_input() -> InputType {
-    // let a = include_str!("../input.txt").split("\n\n").collect::<Vec<_>>();
-    // println!("{:?}", a);
-    include_str!("../input.txt")
+    include_str!("../../../../inputs/2022/01/input.txt")
         .split("\n\n")
         .map(|group| {
             group
