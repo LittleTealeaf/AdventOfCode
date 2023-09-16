@@ -23,6 +23,7 @@ func main() {
 	fileBuffer.Close()
 
 	fmt.Println("Part 1:", part_1(input))
+	fmt.Println("Part 2:", part_2(input))
 }
 
 func part_1(input []string) int {
@@ -60,6 +61,49 @@ func part_1(input []string) int {
 			}
 		}
 
+	}
+
+	return sum
+}
+
+func part_2(input []string) int {
+
+	sum := 0
+
+	for i := range input {
+		if i%3 == 0 {
+			elf_a := input[i]
+			elf_b := input[i+1]
+			elf_c := input[i+2]
+
+			frequency := map[int]int{}
+
+			elves := []string{elf_a, elf_b, elf_c}
+
+			for _, elf := range elves {
+				elf_freq := map[int]int{}
+				for i := range elf {
+					ch := int(elf[i])
+					elf_freq[ch] += 1
+				}
+
+				for key := range elf_freq {
+					frequency[key] += 1
+				}
+			}
+
+			for key, value := range frequency {
+				if value == 3 {
+					if int(key) >= int('a') {
+						sum += int(key) - int('a') + 1
+					} else {
+						sum += int(key) - int('A') + 27
+					}
+					break
+				}
+			}
+
+		}
 	}
 
 	return sum
