@@ -1,5 +1,3 @@
-use std::fs;
-
 enum Direction {
     Up,
     Down,
@@ -48,8 +46,7 @@ fn part_2(instructions: Vec<Direction>) -> usize {
 }
 
 fn read_input() -> Vec<Direction> {
-    fs::read_to_string("input.txt")
-        .unwrap()
+    include_str!("../../../../inputs/2015/01/input.txt")
         .chars()
         .into_iter()
         .map(Direction::try_from)

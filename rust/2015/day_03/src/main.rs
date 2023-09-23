@@ -1,13 +1,13 @@
-use std::{collections::HashSet, fs::read_to_string};
+use std::collections::HashSet;
 
 fn main() {
     {
-        let input = parse_input(read_to_string("input.txt").unwrap());
+        let input = parse_input(include_str!("../../../../inputs/2015/03/input.txt").to_string());
         let result = part_1(input);
         println!("Part 1: {} houses", result);
     }
     {
-        let input = parse_input(read_to_string("input.txt").unwrap());
+        let input = parse_input(include_str!("../../../../inputs/2015/03/input.txt").to_string());
         let result = part_2(input);
         println!("Part 2: {} houses", result);
     }

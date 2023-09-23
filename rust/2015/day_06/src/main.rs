@@ -1,8 +1,4 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-    num::ParseIntError,
-};
+use std::num::ParseIntError;
 
 #[derive(Debug)]
 enum ParseError {
@@ -67,22 +63,20 @@ impl TryFrom<String> for Instruction {
 
 fn main() {
     {
-        let file = File::open("input.txt").unwrap();
-        let instructions = BufReader::new(file)
+        let instructions = include_str!("../../../../inputs/2015/06/input.txt")
             .lines()
             .into_iter()
-            .map(Result::unwrap)
+            .map(String::from)
             .map(Instruction::try_from)
             .map(Result::unwrap)
             .collect::<Vec<_>>();
         println!("Part 1: {}", part_1(instructions))
     }
     {
-        let file = File::open("input.txt").unwrap();
-        let instructions = BufReader::new(file)
+        let instructions = include_str!("../../../../inputs/2015/06/input.txt")
             .lines()
             .into_iter()
-            .map(Result::unwrap)
+            .map(String::from)
             .map(Instruction::try_from)
             .map(Result::unwrap)
             .collect::<Vec<_>>();
