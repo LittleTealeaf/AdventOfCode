@@ -21,17 +21,26 @@ fn part_1(input: &str) -> u32 {
 }
 
 fn part_2(input: &str) -> u32 {
-    let mut elfs = input
-        .split("\n\n")
-        .map(|line| {
-            line.lines()
-                .filter_map(|l| l.parse::<u32>().ok())
-                .sum::<u32>()
-        })
-        .collect::<Vec<_>>();
-    elfs.sort();
-    elfs.reverse();
-    return elfs[0] + elfs[1] + elfs[2];
+    let mut top_elves = [0; 3];
+
+    let mut current = 0;
+    for line in input.lines() {
+        match line.parse::<u32>() {
+            Ok(value) => current += value,
+            Err(_) => {
+                if current >= top_elves[0] {
+                    top_elves[0] = current;
+                    top_elves.sort();
+                }
+                current = 0;
+            }
+        }
+    }
+    if current >= top_elves[0] {
+        top_elves[0] = current;
+        top_elves.sort();
+    }
+    top_elves.into_iter().sum()
 }
 
 #[test]
