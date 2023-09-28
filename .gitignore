@@ -1,4 +1,7 @@
-.ccls-cache
-**/a.out
-**/solution
-**/rust/target/**
+# .ccls-cache
+# **/a.out
+# **/solution
+# **/rust/target/**
+**/rust/target
+**/java/**/*.class
+**/cpp/**/*.out
