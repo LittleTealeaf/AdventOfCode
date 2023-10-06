@@ -59,6 +59,8 @@ int main() {
     lines.push_back(line);
   }
 
+	file.close();
+
   std::cout << "Part 1: " << part_1(lines) << std::endl;
   std::cout << "Part 2: " << part_2(lines) << std::endl;
 
