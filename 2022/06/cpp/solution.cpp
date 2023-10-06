@@ -6,7 +6,6 @@ using namespace std;
 
 int find_marker(vector<char> &chars, int marker_size) {
   for (int i = 0; i < chars.size() - marker_size; i++) {
-    // Check if there are any matches in the next 4 items
     bool match = true;
     for (int j = 0; j < marker_size && match; j++) {
       for (int k = j + 1; k < marker_size && match; k++) {
