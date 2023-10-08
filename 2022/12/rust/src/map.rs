@@ -50,6 +50,33 @@ impl Map {
     pub fn get(&self, point: Point) -> Option<usize> {
         self.board.get(point.y)?.get(point.x).copied()
     }
+
+    pub fn print_with_visited(&self, visited: &Vec<Point>) {
+        println!(
+            "{}",
+            self.board
+                .iter()
+                .enumerate()
+                .map(|(y, row)| {
+                    format!(
+                        "{}\n",
+                        row.iter()
+                            .enumerate()
+                            .map(|(x, height)| {
+                                let height = *height as u8;
+
+                                if visited.contains(&Point { x, y }) {
+                                    (height + 'A' as u8) as char
+                                } else {
+                                    (height + 'a' as u8) as char
+                                }
+                            })
+                            .collect::<String>()
+                    )
+                })
+                .collect::<String>()
+        );
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -66,5 +93,5 @@ impl Point {
 
 #[test]
 fn test_map() {
-    assert_eq!(Map::load_test().get(Point {x: 2, y: 0}), Some(1));
+    assert_eq!(Map::load_test().get(Point { x: 2, y: 0 }), Some(1));
 }
