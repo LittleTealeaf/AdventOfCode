@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub struct Map {
     pub board: Vec<Vec<usize>>,
     pub start: Point,
