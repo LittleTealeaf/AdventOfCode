@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use map::{Map, Tile};
 
 mod map;
