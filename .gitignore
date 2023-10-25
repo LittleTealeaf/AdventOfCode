@@ -5,3 +5,135 @@
 **/rust/target
 **/java/**/*.class
 **/cpp/**/*.out
+
+
+## CSHARP
+
+# User-specific files
+**/cs/*.suo
+**/cs/*.user
+**/cs/*.sln.docstates
+
+# Build results
+
+**/cs/[Dd]ebug/
+**/cs/[Rr]elease/
+**/cs/x64/
+**/cs/[Bb]in/
+**/cs/[Oo]bj/
+
+# MSTest test Results
+**/cs/[Tt]est[Rr]esult*/
+**/cs/[Bb]uild[Ll]og.*
+
+**/cs/*_i.c
+**/cs/*_p.c
+**/cs/*_i.h
+**/cs/*.ilk
+**/cs/*.meta
+**/cs/*.obj
+**/cs/*.pch
+**/cs/*.pdb
+**/cs/*.pgc
+**/cs/*.pgd
+**/cs/*.rsp
+**/cs/*.sbr
+**/cs/*.tlb
+**/cs/*.tli
+**/cs/*.tlh
+**/cs/*.tmp
+**/cs/*.tmp_proj
+**/cs/*.log
+**/cs/*.vspscc
+**/cs/*.vssscc
+**/cs/.builds
+**/cs/*.pidb
+**/cs/*.log
+**/cs/*.svclog
+**/cs/*.scc
+
+# Visual C++ cache files
+**/cs/ipch/
+**/cs/*.aps
+**/cs/*.ncb
+**/cs/*.opensdf
+**/cs/*.sdf
+**/cs/*.cachefile
+
+# Visual Studio profiler
+**/cs/*.psess
+**/cs/*.vsp
+**/cs/*.vspx
+
+# Guidance Automation Toolkit
+**/cs/*.gpState
+
+# ReSharper is a .NET coding add-in
+**/cs/_ReSharper*/
+**/cs/*.[Rr]e[Ss]harper
+**/cs/*.DotSettings.user
+
+# Click-Once directory
+**/cs/publish/
+
+# Publish Web Output
+**/cs/*.Publish.xml
+**/cs/*.pubxml
+**/cs/*.azurePubxml
+
+# NuGet Packages Directory
+## TODO: If you have NuGet Package Restore enabled, uncomment the next line
+**/cs/packages/
+## TODO: If the tool you use requires repositories.config, also uncomment the next line
+**/cs/!packages/repositories.config
+
+# Windows Azure Build Output
+**/cs/csx/
+**/cs/*.build.csdef
+
+# Windows Store app package directory
+**/cs/AppPackages/
+
+# Others
+**/cs/sql/
+**/cs/*.Cache
+**/cs/ClientBin/
+**/cs/[Ss]tyle[Cc]op.*
+**/cs/![Ss]tyle[Cc]op.targets
+**/cs/~$*
+**/cs/*~
+**/cs/*.dbmdl
+**/cs/*.[Pp]ublish.xml
+**/cs/*.publishsettings
+
+# RIA/Silverlight projects
+**/cs/Generated_Code/
+
+# Backup & report files from converting an old project file to a newer
+# Visual Studio version. Backup files are not needed, because we have git ;-)
+**/cs/_UpgradeReport_Files/
+**/cs/Backup*/
+**/cs/UpgradeLog*.XML
+**/cs/UpgradeLog*.htm
+
+# SQL Server files
+**/cs/App_Data/*.mdf
+**/cs/App_Data/*.ldf
+# =========================
+# Windows detritus
+# =========================
+
+# Windows image file caches
+**/cs/Thumbs.db
+**/cs/ehthumbs.db
+
+# Folder config file
+**/cs/Desktop.ini
+
+# Recycle Bin used on file shares
+**/cs/$RECYCLE.BIN/
+
+# Mac desktop service store files
+**/cs/.DS_Store
+
+**/cs/_NCrunch*
