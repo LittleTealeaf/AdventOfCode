@@ -76,7 +76,5 @@ fn part_2(instructions: &Vec<Instruction>) {
         } else {
             print!(" ");
         }
-
     }
-
 }
