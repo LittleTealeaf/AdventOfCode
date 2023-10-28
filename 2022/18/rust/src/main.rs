@@ -120,6 +120,9 @@ fn part_2(input: &Vec<Coord>) -> usize {
     let mut surface_area = 0;
 
     while let Some(Coord { x, y, z }) = frontier.pop() {
+        if matches!(grid[x][y][z], Cube::Visited) {
+            continue;
+        }
         grid[x][y][z] = Cube::Visited;
         let directions = [
             (x > 0).then(|| Coord::new(x - 1, y, z)),
@@ -135,9 +138,7 @@ fn part_2(input: &Vec<Coord>) -> usize {
         for coord in directions {
             match grid[coord.x][coord.y][coord.z] {
                 Cube::Empty => {
-                    if !frontier.contains(&coord) {
-                        frontier.push(coord);
-                    }
+                    frontier.push(coord);
                 }
                 Cube::Filled => {
                     surface_area += 1;
