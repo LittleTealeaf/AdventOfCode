@@ -104,18 +104,7 @@ fn part_2(input: &Vec<Coord>) -> usize {
         grid[coord.x][coord.y][coord.z] = Cube::Filled;
     }
 
-    let mut frontier = (0..max_x)
-        .map(|x| {
-            (0..max_y)
-                .map(move |y| {
-                    (0..max_z).filter_map(move |z| {
-                        (x == 0 || y == 0 || z == 0).then_some(Coord::new(x, y, z))
-                    })
-                })
-                .flatten()
-        })
-        .flatten()
-        .collect::<Vec<_>>();
+    let mut frontier = vec![Coord::new(0, 0, 0)];
 
     let mut surface_area = 0;
 
