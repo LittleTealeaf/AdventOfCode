@@ -19,6 +19,7 @@ fn part_1(input: &Vec<u64>) -> u64 {
         g2_sum: u64,
         stack: Vec<u64>,
         goal_sum: u64,
+        g1_index: usize,
     }
 
     impl State {
@@ -28,10 +29,11 @@ fn part_1(input: &Vec<u64>) -> u64 {
             } else if self.g1_sum < self.goal_sum {
                 let mut min: Option<State> = None;
 
-                let mut children = (0..self.stack.len())
+                let mut children = (self.g1_index..self.stack.len())
                     .map(|i| {
                         let mut state = self.clone();
                         let value = state.stack.swap_remove(i);
+                        state.g1_index = i;
                         state.g1_sum += value;
                         state.g1_len += 1;
 
@@ -73,7 +75,6 @@ fn part_1(input: &Vec<u64>) -> u64 {
             } else if self.g2_sum > self.goal_sum {
                 None
             } else {
-                println!("{:?}", self);
                 Some(self)
             }
         }
@@ -86,10 +87,10 @@ fn part_1(input: &Vec<u64>) -> u64 {
         g2_sum: 0,
         goal_sum: goal,
         stack: input,
+        g1_index: 0,
     };
 
     let result = state.recusive(usize::MAX).unwrap();
-    println!("{:?}", result);
 
-    0
+    result.g1_prod.unwrap()
 }
