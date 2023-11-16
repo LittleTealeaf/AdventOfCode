@@ -28,21 +28,32 @@ fn part_1(input: &Vec<u64>) -> u64 {
             } else if self.g1_sum < self.goal_sum {
                 let mut min: Option<State> = None;
 
-                for i in 0..self.stack.len() {
-                    let mut state = self.clone();
-                    let value = state.stack.swap_remove(i);
-                    state.g1_sum += value;
-                    state.g1_len += 1;
+                let mut children = (0..self.stack.len())
+                    .map(|i| {
+                        let mut state = self.clone();
+                        let value = state.stack.swap_remove(i);
+                        state.g1_sum += value;
+                        state.g1_len += 1;
 
-                    if let Some(val) = state.g1_prod {
-                        state.g1_prod = val.checked_mul(value)
-                    }
+                        if let Some(val) = state.g1_prod {
+                            state.g1_prod = val.checked_mul(value)
+                        }
 
-                    if let Some(result) = state.clone().recusive(min_length) {
+                        state
+                    })
+                    .collect::<Vec<_>>();
+
+                children.sort_by_key(|i| i.g1_sum);
+                children.reverse();
+
+                for state in children {
+                    if let Some(result) = state.recusive(min_length) {
                         min_length = result.g1_len;
                         if let Some(m) = &min {
-                            if m.g1_prod > result.g1_prod {
-                                min = Some(result)
+                            if let (Some(a), Some(b)) = (m.g1_prod, result.g1_prod) {
+                                if a > b {
+                                    min = Some(result)
+                                }
                             }
                         } else {
                             min = Some(result);
@@ -62,6 +73,7 @@ fn part_1(input: &Vec<u64>) -> u64 {
             } else if self.g2_sum > self.goal_sum {
                 None
             } else {
+                println!("{:?}", self);
                 Some(self)
             }
         }
