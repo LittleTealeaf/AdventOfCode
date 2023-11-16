@@ -1,0 +1,63 @@
+
+    #[derive(Clone, Debug)]
+    struct State {
+        group_1: Vec<u64>,
+        group_2: Vec<u64>,
+        remaining: Vec<u64>,
+    }
+
+    impl State {
+        fn is_valid(&self, goal: u64) -> bool {
+            self.group_1.iter().sum::<u64>() <= goal && self.group_2.iter().sum::<u64>() <= goal
+        }
+
+        fn is_solution(&self, goal: u64) -> bool {
+            self.group_1.iter().sum::<u64>() == goal && self.group_2.iter().sum::<u64>() == goal
+        }
+
+        fn len(&self) -> usize {
+            self.group_1.len()
+        }
+
+        fn entanglement(&self) -> u64 {
+            self.group_1.iter().product::<u64>()
+        }
+    }
+
+    fn recursive(state: State, goal: u64) -> Option<State> {
+        if state.group_1.iter().sum::<u64>() < goal {
+
+            // (0..state.remaining.len())
+            //     .filter_map(|i| {
+            //         let mut st = state.clone();
+            //         let value = st.remaining.swap_remove(i);
+            //         st.group_1.push(value);
+            //         st.is_valid(goal).then(|| recursive(st, goal))?
+            //     })
+            //     .reduce(|a, b| {
+            //         if a.entanglement() > b.entanglement() {
+            //             a
+            //         } else {
+            //             b
+            //         }
+            //     })
+        } else if state.group_2.iter().sum::<u64>() < goal {
+            (0..state.remaining.len()).find_map(|i| {
+                let mut st = state.clone();
+                let value = st.remaining.swap_remove(i);
+                st.group_2.push(value);
+                st.is_valid(goal).then(|| recursive(st, goal))?
+            })
+        } else {
+            println!("{} {:?}", state.is_solution(goal), state);
+            state.is_solution(goal).then_some(state)
+        }
+    }
+
+    let state = State {
+        group_1: Vec::new(),
+        group_2: Vec::new(),
+        remaining: input.clone(),
+    };
+
+    let result = recursive(state, goal).unwrap();
