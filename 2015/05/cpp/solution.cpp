@@ -5,10 +5,10 @@
 #include <vector>
 using namespace std;
 
-int part_1(vector<string> lines) {
+int part_1(vector<string> input) {
   int count = 0;
 
-  for (string line : lines) {
+  for (string line : input) {
     int vowels = 0;
     bool has_double = false;
 
