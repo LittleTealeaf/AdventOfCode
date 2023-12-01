@@ -34,10 +34,8 @@ fn part_2(input: &str) -> i32 {
 
     input
         .lines()
-        .map(|line| {
-            let string = line.to_string();
+        .map(|string| {
             let chars = string.chars().collect::<Vec<_>>();
-
             [
                 (0..string.len()).collect::<Vec<_>>(),
                 (0..string.len()).rev().collect::<Vec<_>>(),
