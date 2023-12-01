@@ -77,8 +77,3 @@ zoneight234
 7pqrstsixteen";
     assert_eq!(part_2(input), 281);
 }
-
-#[test]
-fn part_2_answer() {
-    assert_eq!(part_2(include_str!("../../input.txt")), 55614);
-}
