@@ -83,29 +83,6 @@ fn part_2(input: &str) -> i32 {
                 .collect::<String>()
                 .parse::<i32>()
                 .unwrap()
-
-            // let mut string = chars.to_string();
-            //
-            // for i in 0..string.len() {
-            //     for (word, dig) in DIGITS {
-            //         if word.len() + i <= string.len() {
-            //             let window = &string[i..i + word.len()];
-            //             if window == word {
-            //                 string = string.replacen(word, dig, 1);
-            //             }
-            //         }
-            //     }
-            // }
-            //
-            // let digits = string
-            //     .chars()
-            //     .filter(|i| i.is_numeric())
-            //     .collect::<Vec<_>>();
-            // [digits.first().unwrap(), digits.last().unwrap()]
-            //     .into_iter()
-            //     .collect::<String>()
-            //     .parse::<i32>()
-            //     .unwrap()
         })
         .sum()
 }
