@@ -39,7 +39,7 @@ fn part_2(input: &str) -> i32 {
             let first_digit = {
                 let mut ch = '\0';
                 'l: for i in 0..string.len() {
-                    if string[i].is_digit(10) {
+                    if string[i].is_ascii_digit() {
                         ch = string[i];
                         break 'l;
                     } else {
@@ -60,7 +60,7 @@ fn part_2(input: &str) -> i32 {
             let last_digit = {
                 let mut ch = '\0';
                 'l: for i in (0..string.len()).rev() {
-                    if string[i].is_digit(10) {
+                    if string[i].is_ascii_digit() {
                         ch = string[i];
                         break 'l;
                     } else {
