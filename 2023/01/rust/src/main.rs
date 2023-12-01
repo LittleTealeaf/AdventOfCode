@@ -31,58 +31,37 @@ fn part_2(input: &str) -> i32 {
         ("eight", '8'),
         ("nine", '9'),
     ];
+
     input
         .lines()
-        .map(|chars| {
-            let string = chars.chars().collect::<Vec<_>>();
+        .map(|line| {
+            let string = line.to_string();
+            let chars = string.chars().collect::<Vec<_>>();
 
-            let first_digit = {
-                let mut ch = '\0';
-                'l: for i in 0..string.len() {
-                    if string[i].is_ascii_digit() {
-                        ch = string[i];
-                        break 'l;
+            [
+                (0..string.len()).collect::<Vec<_>>(),
+                (0..string.len()).rev().collect::<Vec<_>>(),
+            ]
+            .map(|range| {
+                for i in range {
+                    if chars[i].is_ascii_digit() {
+                        return chars[i];
                     } else {
                         for (word, dig) in DIGITS {
                             if i + word.len() <= string.len() {
-                                let window = &string[i..i + word.len()].iter().collect::<String>();
-                                if window == word {
-                                    ch = dig;
-                                    break 'l;
+                                if &string[i..i + word.len()] == word {
+                                    return dig;
                                 }
                             }
                         }
                     }
                 }
-                ch
-            };
-
-            let last_digit = {
-                let mut ch = '\0';
-                'l: for i in (0..string.len()).rev() {
-                    if string[i].is_ascii_digit() {
-                        ch = string[i];
-                        break 'l;
-                    } else {
-                        for (word, dig) in DIGITS {
-                            if i + word.len() <= string.len() {
-                                let window = &string[i..i + word.len()].iter().collect::<String>();
-                                if window == word {
-                                    ch = dig;
-                                    break 'l;
-                                }
-                            }
-                        }
-                    }
-                }
-                ch
-            };
-
-            [first_digit, last_digit]
-                .into_iter()
-                .collect::<String>()
-                .parse::<i32>()
-                .unwrap()
+                panic!()
+            })
+            .into_iter()
+            .collect::<String>()
+            .parse::<i32>()
+            .unwrap()
         })
         .sum()
 }
@@ -97,4 +76,9 @@ xtwone3four
 zoneight234
 7pqrstsixteen";
     assert_eq!(part_2(input), 281);
+}
+
+#[test]
+fn part_2_answer() {
+    assert_eq!(part_2(include_str!("../../input.txt")), 55614);
 }
