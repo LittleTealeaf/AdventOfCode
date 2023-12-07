@@ -46,10 +46,9 @@ fn part_2(input: &str) -> i32 {
                         return chars[i];
                     } else {
                         for (word, dig) in DIGITS {
-                            if i + word.len() <= string.len() {
-                                if &string[i..i + word.len()] == word {
-                                    return dig;
-                                }
+                            if i + word.len() <= string.len() && &string[i..i + word.len()] == word
+                            {
+                                return dig;
                             }
                         }
                     }
