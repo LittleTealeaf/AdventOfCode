@@ -73,7 +73,7 @@ impl Solution {
                                 start: index,
                                 length: path.len() - index,
                                 content: path
-                                    .iter()
+                                    .into_iter()
                                     .enumerate()
                                     .filter_map(|(i, v)| v.ends_with('Z').then_some(i))
                                     .collect(),
