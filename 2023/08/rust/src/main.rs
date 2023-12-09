@@ -43,27 +43,21 @@ impl Solution {
         let mut location = "AAA".to_string();
         while location != "ZZZ" {
             let direction = self.instructions[steps % self.instructions.len()];
-            location = self
-                .map
-                .get(&location)
-                .unwrap()
-                .get(direction)
-                .unwrap()
-                .to_string();
+            location = self.map[&location][direction].to_string();
             steps += 1;
         }
         steps
     }
 
     fn part_2(&self) -> usize {
-        #[derive(Debug)]
         struct Loop {
             start: usize,
             length: usize,
             content: Vec<usize>,
         }
 
-        self.map
+        *self
+            .map
             .keys()
             .filter(|n| n.ends_with('A'))
             .cloned()
@@ -72,13 +66,7 @@ impl Solution {
                 loop {
                     let direction = self.instructions[(path.len() - 1) % self.instructions.len()];
                     let position = path.last().unwrap();
-                    let next = self
-                        .map
-                        .get(position)
-                        .unwrap()
-                        .get(direction)
-                        .unwrap()
-                        .to_string();
+                    let next = self.map[position][direction].to_string();
                     if let Some(index) = path.iter().position(|i| i == &next) {
                         if path.len() % self.instructions.len() == index % self.instructions.len() {
                             return Loop {
@@ -90,36 +78,32 @@ impl Solution {
                                     .filter_map(|(i, v)| v.ends_with('Z').then_some(i))
                                     .collect(),
                             };
-                        } else {
-                            path.push(next);
                         }
-                    } else {
-                        path.push(next);
                     }
+                    path.push(next);
                 }
             })
             .tree_fold1(|a, b| {
-                // Get the lcd loop length
                 let length = a.length.lcm(&b.length);
 
-                let mut a_c = Vec::new();
-                for i in 0..(length / a.length) {
-                    for item in &a.content {
-                        if i == 0 || *item >= a.start {
-                            a_c.push(item + i * a.length);
-                        }
-                    }
-                }
+                let a_content = (0..(length / a.length))
+                    .flat_map(|i| {
+                        a.content.iter().filter_map(move |item| {
+                            (i == 0 || *item >= a.start).then_some(item + i * a.length)
+                        })
+                    })
+                    .collect_vec();
 
-                let mut content = Vec::new();
-                for i in 0..(length / b.length) {
-                    for item in &b.content {
-                        let val = item + i * b.length;
-                        if (i == 0 || *item >= b.start) && a_c.contains(&val) {
-                            content.push(val);
-                        }
-                    }
-                }
+                let content = (0..(length / b.length))
+                    .flat_map(|i| {
+                        let content = &a_content;
+                        b.content.iter().filter_map(move |item| {
+                            ((i == 0 || *item >= b.start)
+                                && content.binary_search(&(item + i * b.length)).is_ok())
+                            .then_some(item + i * b.length)
+                        })
+                    })
+                    .collect();
 
                 let start = a.start.max(b.start);
 
@@ -131,8 +115,7 @@ impl Solution {
             })
             .unwrap()
             .content
-            .into_iter()
-            .next()
+            .first()
             .unwrap()
     }
 }
