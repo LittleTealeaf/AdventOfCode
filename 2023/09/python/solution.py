@@ -1,5 +1,3 @@
-
-
 with open("../input.txt") as file:
     data = []
     for item in file.readlines():
@@ -23,6 +21,7 @@ def part_1_find_next(line: list[int]) -> int:
         raise ValueError("Error")
 
     return last + part_1_find_next(diffs)
+
 
 def part_2_find_next(line: list[int]) -> int:
     diffs = []
@@ -56,4 +55,3 @@ if __name__ == "__main__":
 
     print(f"Part 1: {part_1}")
     print(f"Part 2: {part_2}")
-
