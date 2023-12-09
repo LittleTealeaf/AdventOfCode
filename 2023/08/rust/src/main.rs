@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use itertools::Itertools;
 use num::Integer;
 
 fn main() {
@@ -58,22 +59,11 @@ impl Solution {
         #[derive(Debug)]
         struct Loop {
             start: usize,
-            prefix: Vec<bool>,
-            content: Vec<bool>,
+            length: usize,
+            content: Vec<usize>,
         }
 
-        impl Loop {
-            fn get(&self, index: usize) -> bool {
-                if index < self.start {
-                    self.prefix[index]
-                } else {
-                    self.content[(index - self.start) % self.content.len()]
-                }
-            }
-        }
-
-        let loops = self
-            .map
+        self.map
             .keys()
             .filter(|n| n.ends_with('A'))
             .cloned()
@@ -89,12 +79,16 @@ impl Solution {
                         .get(direction)
                         .unwrap()
                         .to_string();
-                    if let Some(i) = path.iter().position(|i| i == &next) {
-                        if path.len() % self.instructions.len() == i % self.instructions.len() {
+                    if let Some(index) = path.iter().position(|i| i == &next) {
+                        if path.len() % self.instructions.len() == index % self.instructions.len() {
                             return Loop {
-                                start: i,
-                                prefix: path[..i].iter().map(|i| i.ends_with('Z')).collect(),
-                                content: path[i..].iter().map(|i| i.ends_with('Z')).collect(),
+                                start: index,
+                                length: path.len() - index,
+                                content: path
+                                    .iter()
+                                    .enumerate()
+                                    .filter_map(|(i, v)| v.ends_with('Z').then_some(i))
+                                    .collect(),
                             };
                         } else {
                             path.push(next);
@@ -104,28 +98,42 @@ impl Solution {
                     }
                 }
             })
-            .collect::<Vec<_>>();
+            .tree_fold1(|a, b| {
+                // Get the lcd loop length
+                let length = a.length.lcm(&b.length);
 
-        let check_loop_length = loops
-            .iter()
-            .map(|l| l.content.len())
-            .reduce(|a, b| a.lcm(&b))
-            .unwrap();
-        let last_start = loops.iter().map(|l| l.start).max().unwrap();
-
-        // Alternate solution could be to merge together loops
-
-        let max_length = check_loop_length + last_start;
-        'l: for i in (0..=max_length).rev() {
-            for l in &loops {
-                if !l.get(i) {
-                    continue 'l;
+                let mut a_c = Vec::new();
+                for i in 0..(length / a.length) {
+                    for item in &a.content {
+                        if i == 0 || *item >= a.start {
+                            a_c.push(item + i * a.length);
+                        }
+                    }
                 }
-            }
-            return i;
-        }
 
-        0
+                let mut content = Vec::new();
+                for i in 0..(length / b.length) {
+                    for item in &b.content {
+                        let val = item + i * b.length;
+                        if (i == 0 || *item >= b.start) && a_c.contains(&val) {
+                            content.push(val);
+                        }
+                    }
+                }
+
+                let start = a.start.max(b.start);
+
+                Loop {
+                    start,
+                    length,
+                    content,
+                }
+            })
+            .unwrap()
+            .content
+            .into_iter()
+            .next()
+            .unwrap()
     }
 }
 
