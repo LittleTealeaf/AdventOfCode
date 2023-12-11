@@ -116,7 +116,6 @@ impl Solution {
             .flat_map(|a| {
                 galaxies
                     .iter()
-                    .filter(move |&b| (a != b))
                     .map(|b| a.x.abs_diff(b.x) + a.y.abs_diff(b.y))
             })
             .sum::<u64>()
