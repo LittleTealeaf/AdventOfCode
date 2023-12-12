@@ -119,7 +119,6 @@ impl Solution {
                     count: usize,
                 }
 
-                // Memo of the
                 let mut memo: HashMap<Key, usize> = HashMap::new();
 
                 fn recursive(mut row: Row, memo: &mut HashMap<Key, usize>) -> usize {
