@@ -35,12 +35,11 @@ impl Solution {
         map.into_iter()
             .rev()
             .enumerate()
-            .map(|(index, row)| {
+            .flat_map(|(index, row)| {
                 row.into_iter()
-                    .filter_map(|ch| (ch == 'O').then_some(index + 1))
-                    .sum::<usize>()
+                    .filter_map(move |ch| (ch == 'O').then_some(index + 1))
             })
-            .sum::<usize>()
+            .sum()
     }
 
     fn part_2(&self) -> usize {
@@ -123,12 +122,11 @@ impl Solution {
         map.into_iter()
             .rev()
             .enumerate()
-            .map(|(index, row)| {
+            .flat_map(|(index, row)| {
                 row.into_iter()
-                    .filter_map(|ch| (ch == 'O').then_some(index + 1))
-                    .sum::<usize>()
+                    .filter_map(move |ch| (ch == 'O').then_some(index + 1))
             })
-            .sum::<usize>()
+            .sum()
     }
 }
 
