@@ -80,7 +80,6 @@ impl Solution {
             visited.insert(beam);
 
             energized.insert((beam.x, beam.y));
-            // energized[beam.y as usize][beam.x as usize] = true;
 
             match self.map[beam.y as usize][beam.x as usize] {
                 '.' => frontier.push(beam.go(beam.direction)),
