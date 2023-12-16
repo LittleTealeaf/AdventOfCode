@@ -60,7 +60,7 @@ impl Solution {
     }
 
     fn solve(&self, start: Beam) -> usize {
-        let mut energized = vec![vec![false; self.map[0].len()]; self.map.len()];
+        let mut energized = HashSet::new();
         let h = self.map.len();
         let w = self.map[0].len();
 
@@ -79,7 +79,8 @@ impl Solution {
 
             visited.insert(beam);
 
-            energized[beam.y as usize][beam.x as usize] = true;
+            energized.insert((beam.x, beam.y));
+            // energized[beam.y as usize][beam.x as usize] = true;
 
             match self.map[beam.y as usize][beam.x as usize] {
                 '.' => frontier.push(beam.go(beam.direction)),
@@ -111,11 +112,7 @@ impl Solution {
             }
         }
 
-        energized
-            .into_iter()
-            .flat_map(|row| row.into_iter())
-            .filter(|i| *i)
-            .count()
+        energized.len()
     }
 
     fn part_1(&self) -> usize {
