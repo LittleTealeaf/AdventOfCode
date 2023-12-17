@@ -69,16 +69,16 @@ impl Solution {
         let mut frontier = vec![start];
 
         while let Some(beam) = frontier.pop() {
-            if beam.x < 0 || beam.x >= w as i32 || beam.y < 0 || beam.y >= h as i32 {
-                continue;
-            }
-
-            if visited.contains(&beam) {
+            if beam.x < 0
+                || beam.x >= w as i32
+                || beam.y < 0
+                || beam.y >= h as i32
+                || visited.contains(&beam)
+            {
                 continue;
             }
 
             visited.insert(beam);
-
             energized.insert((beam.x, beam.y));
 
             match self.map[beam.y as usize][beam.x as usize] {
