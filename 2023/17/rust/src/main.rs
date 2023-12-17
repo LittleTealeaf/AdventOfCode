@@ -32,13 +32,7 @@ impl PartialOrd for Node {
 
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.heuristic.cmp(&other.heuristic)
-    }
-}
-
-impl Node {
-    fn to_visited(self) -> (usize, usize, usize, i32, i32) {
-        (self.x, self.y, self.consecutive, self.dx, self.dy)
+        (self.heuristic + self.cost).cmp(&(other.heuristic + other.cost))
     }
 }
 
@@ -52,15 +46,13 @@ impl Solution {
         }
     }
 
-    fn in_bounds(&self, x: usize, y: usize, dx: i32, dy: i32) -> bool {
-        (dx == 0 || (dx == -1 && x > 0) || (dx == 1 && x < self.map[0].len() - 1))
-            && (dy == 0 || (dy == -1 && y > 0) || (dy == 1 && y < self.map.len() - 1))
-    }
-
-    fn part_1(&self) -> u32 {
+    fn astar<F, I>(&self, action_map: F) -> u32
+    where
+        F: Fn(Node) -> I,
+        I: Iterator<Item = (i32, i32, bool)>,
+    {
         let goal_x = self.map[0].len() - 1;
         let goal_y = self.map.len() - 1;
-
         let mut visited = HashSet::new();
 
         let mut frontier: BinaryHeap<Reverse<Node>> = [(0, 1), (1, 0)]
@@ -73,14 +65,13 @@ impl Solution {
                     dy: y as i32,
                     cost: self.map[y][x],
                     consecutive: 1,
-                    heuristic: self.map[y][x] + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
+                    heuristic: (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
                 })
             })
             .collect();
 
         while let Some(Reverse(n)) = frontier.pop() {
-            let visit = n.to_visited();
-            if visited.contains(&visit) {
+            if !visited.insert((n.x, n.y, n.consecutive, n.dx, n.dy)) {
                 continue;
             }
 
@@ -88,8 +79,32 @@ impl Solution {
                 return n.cost;
             }
 
-            visited.insert(visit);
+            frontier.extend(
+                action_map(n)
+                    .filter(|(dx, dy, _)| {
+                        (dx == &0 || (dx == &-1 && n.x > 0) || (dx == &1 && n.x < goal_x))
+                            && (dy == &0 || (dy == &-1 && n.y > 0) || (dy == &1 && n.y < goal_y))
+                    })
+                    .map(|(dx, dy, inc)| {
+                        let x = (n.x as i32 + dx) as usize;
+                        let y = (n.y as i32 + dy) as usize;
+                        Reverse(Node {
+                            x,
+                            y,
+                            dx,
+                            dy,
+                            cost: n.cost + self.map[y][x],
+                            consecutive: if inc { n.consecutive + 1 } else { 1 },
+                            heuristic: (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
+                        })
+                    }),
+            );
+        }
+        panic!()
+    }
 
+    fn part_1(&self) -> u32 {
+        self.astar(|n| {
             [
                 (n.consecutive < 3).then_some((n.dx, n.dy, true)),
                 Some((n.dy, n.dx, false)),
@@ -97,60 +112,11 @@ impl Solution {
             ]
             .into_iter()
             .flatten()
-            .filter(|(dx, dy, _)| self.in_bounds(n.x, n.y, *dx, *dy))
-            .for_each(|(dx, dy, inc)| {
-                let x = (n.x as i32 + dx) as usize;
-                let y = (n.y as i32 + dy) as usize;
-                frontier.push(Reverse(Node {
-                    x,
-                    y,
-                    dx,
-                    dy,
-                    cost: n.cost + self.map[y][x],
-                    consecutive: if inc { n.consecutive + 1 } else { 1 },
-                    heuristic: n.cost
-                        + self.map[y][x]
-                        + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                }))
-            });
-        }
-
-        0
+        })
     }
 
     fn part_2(&self) -> u32 {
-        let goal_x = self.map[0].len() - 1;
-        let goal_y = self.map.len() - 1;
-
-        let mut visited = HashSet::new();
-
-        let mut frontier: BinaryHeap<Reverse<Node>> = [(0, 1), (1, 0)]
-            .into_iter()
-            .map(|(x, y)| {
-                Reverse(Node {
-                    x,
-                    y,
-                    dx: x as i32,
-                    dy: y as i32,
-                    cost: self.map[y][x],
-                    consecutive: 1,
-                    heuristic: self.map[y][x] + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                })
-            })
-            .collect();
-
-        while let Some(Reverse(n)) = frontier.pop() {
-            let visit = n.to_visited();
-            if visited.contains(&visit) {
-                continue;
-            }
-
-            if n.x == goal_x && n.y == goal_y {
-                return n.cost;
-            }
-
-            visited.insert(visit);
-
+        self.astar(|n| {
             [
                 (n.consecutive < 10).then_some((n.dx, n.dy, true)),
                 (n.consecutive >= 4).then_some((n.dy, n.dx, false)),
@@ -158,25 +124,7 @@ impl Solution {
             ]
             .into_iter()
             .flatten()
-            .filter(|(dx, dy, _)| self.in_bounds(n.x, n.y, *dx, *dy))
-            .for_each(|(dx, dy, inc)| {
-                let x = (n.x as i32 + dx) as usize;
-                let y = (n.y as i32 + dy) as usize;
-                frontier.push(Reverse(Node {
-                    x,
-                    y,
-                    dx,
-                    dy,
-                    cost: n.cost + self.map[y][x],
-                    consecutive: if inc { n.consecutive + 1 } else { 1 },
-                    heuristic: n.cost
-                        + self.map[y][x]
-                        + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                }))
-            });
-        }
-
-        0
+        })
     }
 }
 
