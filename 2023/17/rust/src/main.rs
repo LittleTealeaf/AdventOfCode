@@ -63,95 +63,56 @@ impl Solution {
 
         let mut visited = HashSet::new();
 
-        let mut frontier: BinaryHeap<Reverse<Node>> = BinaryHeap::new();
-        frontier.push(Reverse(Node {
-            x: 0,
-            y: 1,
-            cost: self.map[1][0],
-            consecutive: 1,
-            heuristic: self.map[1][0] + (goal_x as u32 + goal_y as u32 - 1),
-            dx: 0,
-            dy: 1,
-        }));
-        frontier.push(Reverse(Node {
-            x: 1,
-            y: 0,
-            cost: self.map[0][1],
-            consecutive: 1,
-            heuristic: self.map[0][1] + (goal_x as u32 + goal_y as u32 - 1),
-            dx: 1,
-            dy: 0,
-        }));
+        let mut frontier: BinaryHeap<Reverse<Node>> = [(0, 1), (1, 0)]
+            .into_iter()
+            .map(|(x, y)| {
+                Reverse(Node {
+                    x,
+                    y,
+                    dx: x as i32,
+                    dy: y as i32,
+                    cost: self.map[y][x],
+                    consecutive: 1,
+                    heuristic: self.map[y][x] + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
+                })
+            })
+            .collect();
 
-        while let Some(Reverse(node)) = frontier.pop() {
-            let visit = node.to_visited();
+        while let Some(Reverse(n)) = frontier.pop() {
+            let visit = n.to_visited();
             if visited.contains(&visit) {
                 continue;
             }
 
-            visited.insert(visit);
-
-            if node.x == goal_x && node.y == goal_y {
-                return node.cost;
+            if n.x == goal_x && n.y == goal_y {
+                return n.cost;
             }
 
-            let Node {
-                x,
-                y,
-                cost,
-                heuristic: _,
-                dx,
-                dy,
-                consecutive,
-            } = node;
+            visited.insert(visit);
 
-            if node.consecutive < 3 && self.in_bounds(x, y, dx, dy) {
-                let x = (node.x as i32 + node.dx) as usize;
-                let y = (node.y as i32 + node.dy) as usize;
+            [
+                (n.consecutive < 3).then_some((n.dx, n.dy, true)),
+                Some((n.dy, n.dx, false)),
+                Some((-n.dy, -n.dx, false)),
+            ]
+            .into_iter()
+            .flatten()
+            .filter(|(dx, dy, _)| self.in_bounds(n.x, n.y, *dx, *dy))
+            .for_each(|(dx, dy, inc)| {
+                let x = (n.x as i32 + dx) as usize;
+                let y = (n.y as i32 + dy) as usize;
                 frontier.push(Reverse(Node {
                     x,
                     y,
                     dx,
                     dy,
-                    cost: cost + self.map[y][x],
-                    consecutive: consecutive + 1,
-                    heuristic: cost
+                    cost: n.cost + self.map[y][x],
+                    consecutive: if inc { n.consecutive + 1 } else { 1 },
+                    heuristic: n.cost
                         + self.map[y][x]
                         + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
                 }))
-            }
-
-            if self.in_bounds(x, y, dy, dx) {
-                let x = (x as i32 + dy) as usize;
-                let y = (y as i32 + dx) as usize;
-                frontier.push(Reverse(Node {
-                    x,
-                    y,
-                    dx: dy,
-                    dy: dx,
-                    cost: cost + self.map[y][x],
-                    consecutive: 1,
-                    heuristic: cost
-                        + self.map[y][x]
-                        + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                }));
-            }
-
-            if self.in_bounds(x, y, -dy, -dx) {
-                let x = (x as i32 - dy) as usize;
-                let y = (y as i32 - dx) as usize;
-                frontier.push(Reverse(Node {
-                    x,
-                    y,
-                    dx: -dy,
-                    dy: -dx,
-                    cost: cost + self.map[y][x],
-                    consecutive: 1,
-                    heuristic: cost
-                        + self.map[y][x]
-                        + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                }));
-            }
+            });
         }
 
         0
@@ -163,95 +124,56 @@ impl Solution {
 
         let mut visited = HashSet::new();
 
-        let mut frontier: BinaryHeap<Reverse<Node>> = BinaryHeap::new();
-        frontier.push(Reverse(Node {
-            x: 0,
-            y: 1,
-            cost: self.map[1][0],
-            consecutive: 1,
-            heuristic: self.map[1][0] + (goal_x as u32 + goal_y as u32 - 1),
-            dx: 0,
-            dy: 1,
-        }));
-        frontier.push(Reverse(Node {
-            x: 1,
-            y: 0,
-            cost: self.map[0][1],
-            consecutive: 1,
-            heuristic: self.map[0][1] + (goal_x as u32 + goal_y as u32 - 1),
-            dx: 1,
-            dy: 0,
-        }));
+        let mut frontier: BinaryHeap<Reverse<Node>> = [(0, 1), (1, 0)]
+            .into_iter()
+            .map(|(x, y)| {
+                Reverse(Node {
+                    x,
+                    y,
+                    dx: x as i32,
+                    dy: y as i32,
+                    cost: self.map[y][x],
+                    consecutive: 1,
+                    heuristic: self.map[y][x] + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
+                })
+            })
+            .collect();
 
-        while let Some(Reverse(node)) = frontier.pop() {
-            let visit = node.to_visited();
+        while let Some(Reverse(n)) = frontier.pop() {
+            let visit = n.to_visited();
             if visited.contains(&visit) {
                 continue;
             }
 
-            visited.insert(visit);
-
-            if node.x == goal_x && node.y == goal_y {
-                return node.cost;
+            if n.x == goal_x && n.y == goal_y {
+                return n.cost;
             }
 
-            let Node {
-                x,
-                y,
-                cost,
-                heuristic: _,
-                dx,
-                dy,
-                consecutive,
-            } = node;
+            visited.insert(visit);
 
-            if node.consecutive < 10 && self.in_bounds(x, y, dx, dy) {
-                let x = (node.x as i32 + node.dx) as usize;
-                let y = (node.y as i32 + node.dy) as usize;
+            [
+                (n.consecutive < 10).then_some((n.dx, n.dy, true)),
+                (n.consecutive >= 4).then_some((n.dy, n.dx, false)),
+                (n.consecutive >= 4).then_some((-n.dy, -n.dx, false)),
+            ]
+            .into_iter()
+            .flatten()
+            .filter(|(dx, dy, _)| self.in_bounds(n.x, n.y, *dx, *dy))
+            .for_each(|(dx, dy, inc)| {
+                let x = (n.x as i32 + dx) as usize;
+                let y = (n.y as i32 + dy) as usize;
                 frontier.push(Reverse(Node {
                     x,
                     y,
                     dx,
                     dy,
-                    cost: cost + self.map[y][x],
-                    consecutive: consecutive + 1,
-                    heuristic: cost
+                    cost: n.cost + self.map[y][x],
+                    consecutive: if inc { n.consecutive + 1 } else { 1 },
+                    heuristic: n.cost
                         + self.map[y][x]
                         + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
                 }))
-            }
-
-            if consecutive >= 4 && self.in_bounds(x, y, dy, dx) {
-                let x = (x as i32 + dy) as usize;
-                let y = (y as i32 + dx) as usize;
-                frontier.push(Reverse(Node {
-                    x,
-                    y,
-                    dx: dy,
-                    dy: dx,
-                    cost: cost + self.map[y][x],
-                    consecutive: 1,
-                    heuristic: cost
-                        + self.map[y][x]
-                        + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                }));
-            }
-
-            if consecutive >= 4 && self.in_bounds(x, y, -dy, -dx) {
-                let x = (x as i32 - dy) as usize;
-                let y = (y as i32 - dx) as usize;
-                frontier.push(Reverse(Node {
-                    x,
-                    y,
-                    dx: -dy,
-                    dy: -dx,
-                    cost: cost + self.map[y][x],
-                    consecutive: 1,
-                    heuristic: cost
-                        + self.map[y][x]
-                        + (goal_x.abs_diff(x) + goal_y.abs_diff(y)) as u32,
-                }));
-            }
+            });
         }
 
         0
