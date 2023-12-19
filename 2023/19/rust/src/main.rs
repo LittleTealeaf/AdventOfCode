@@ -20,16 +20,6 @@ enum Target {
     Workflow(String),
 }
 
-impl From<&str> for Target {
-    fn from(value: &str) -> Self {
-        match value {
-            "A" => Self::Accepted,
-            "R" => Self::Rejected,
-            s => Self::Workflow(s.to_string()),
-        }
-    }
-}
-
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
 struct Rule {
     condition: Option<Condition>,
@@ -73,12 +63,20 @@ impl Solution {
                                         value: chars.collect::<String>().parse::<i64>().unwrap(),
                                     })
                                 },
-                                target: target.into(),
+                                target: match target {
+                                    "A" => Target::Accepted,
+                                    "R" => Target::Rejected,
+                                    s => Target::Workflow(s.to_string()),
+                                },
                             }
                         } else {
                             Rule {
                                 condition: None,
-                                target: rule.into(),
+                                target: match rule {
+                                    "A" => Target::Accepted,
+                                    "R" => Target::Rejected,
+                                    s => Target::Workflow(s.to_string()),
+                                },
                             }
                         }
                     })
