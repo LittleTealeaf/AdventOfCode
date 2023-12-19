@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cmp::Ordering, collections::HashMap};
 
 fn main() {
     let solution = Solution::new(include_str!("../../input.txt"));
@@ -9,7 +9,7 @@ fn main() {
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
 struct Condition {
     category: char,
-    operand: char,
+    operand: Ordering,
     value: i64,
 }
 
@@ -18,6 +18,16 @@ enum Target {
     Accepted,
     Rejected,
     Workflow(String),
+}
+
+impl From<&str> for Target {
+    fn from(value: &str) -> Self {
+        match value {
+            "A" => Self::Accepted,
+            "R" => Self::Rejected,
+            s => Self::Workflow(s.to_string()),
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
@@ -40,48 +50,41 @@ impl Solution {
             if line.is_empty() {
                 break;
             }
-            let (name, contents) = line.split_once('{').unwrap();
-            let contents = contents.replace('}', "");
+            let (name, contents) = line[..line.len() - 1].split_once('{').unwrap();
 
-            let rules = contents
-                .split(',')
-                .map(|rule| {
-                    if rule.contains(':') {
-                        let (condition, target) = rule.split_once(':').unwrap();
-                        Rule {
-                            condition: {
-                                let mut chars = condition.chars();
-                                let category = chars.next().unwrap();
-                                let operand = chars.next().unwrap();
-                                let value = chars.collect::<String>().parse::<i64>().unwrap();
-                                Some(Condition {
-                                    category,
-                                    operand,
-                                    value,
-                                })
-                            },
-                            target: match target {
-                                "R" => Target::Rejected,
-                                "A" => Target::Accepted,
-                                name => Target::Workflow(name.to_string()),
-                            },
+            workflows.insert(
+                name.into(),
+                contents
+                    .split(',')
+                    .map(|rule| {
+                        if rule.contains(':') {
+                            let (condition, target) = rule.split_once(':').unwrap();
+                            Rule {
+                                condition: {
+                                    let mut chars = condition.chars();
+                                    Some(Condition {
+                                        category: chars.next().unwrap(),
+                                        operand: match chars.next().unwrap() {
+                                            '>' => Ordering::Greater,
+                                            '<' => Ordering::Less,
+                                            '=' => Ordering::Equal,
+                                            _ => panic!(),
+                                        },
+                                        value: chars.collect::<String>().parse::<i64>().unwrap(),
+                                    })
+                                },
+                                target: target.into(),
+                            }
+                        } else {
+                            Rule {
+                                condition: None,
+                                target: rule.into(),
+                            }
                         }
-                    } else {
-                        Rule {
-                            condition: None,
-                            target: match rule {
-                                "R" => Target::Rejected,
-                                "A" => Target::Accepted,
-                                name => Target::Workflow(name.to_string()),
-                            },
-                        }
-                    }
-                })
-                .collect();
-
-            workflows.insert(name.to_string(), rules);
+                    })
+                    .collect(),
+            );
         }
-
         Self {
             workflows,
             parts: lines
@@ -111,13 +114,9 @@ impl Solution {
                     let workflow = self.workflows.get(workflow).unwrap();
                     for rule in workflow {
                         if let Some(condition) = &rule.condition {
-                            let result = match condition.operand {
-                                '>' => part.get(&condition.category).unwrap() > &condition.value,
-                                '<' => part.get(&condition.category).unwrap() < &condition.value,
-                                '=' => part.get(&condition.category).unwrap() == &condition.value,
-                                _ => panic!(),
-                            };
-                            if result {
+                            if part.get(&condition.category).unwrap().cmp(&condition.value)
+                                == condition.operand
+                            {
                                 status = rule.target.clone();
                                 continue 'workflow;
                             }
@@ -141,151 +140,57 @@ impl Solution {
             max: i64,
         }
 
-        let mut accepted: Vec<HashMap<char, Range>> = Vec::new();
-
+        let mut accepted = Vec::new();
         let mut frontier = vec![(
-            HashMap::from([
-                ('x', Range { min: 1, max: 4000 }),
-                ('m', Range { min: 1, max: 4000 }),
-                ('a', Range { min: 1, max: 4000 }),
-                ('s', Range { min: 1, max: 4000 }),
-            ]),
+            HashMap::from(['x', 'm', 'a', 's'].map(|c| (c, Range { min: 1, max: 4000 }))),
             "in".to_string(),
         )];
 
-        'frontier: while let Some((mut ranges, workflow_name)) = frontier.pop() {
+        'frontier: while let Some((ranges, workflow_name)) = frontier.pop() {
             let workflow = self.workflows.get(&workflow_name).unwrap();
 
             for rule in workflow {
+                let mut result = true;
                 if let Some(condition) = &rule.condition {
                     let range = ranges.get(&condition.category).unwrap();
-                    match condition.operand {
-                        '>' => {
-                            if condition.value < range.max {
-                                if condition.value < range.min {
-                                    match &rule.target {
-                                        Target::Accepted => {
-                                            accepted.push(ranges.clone());
-                                        }
-                                        Target::Workflow(workflow) => {
-                                            frontier.push((ranges.clone(), workflow.clone()))
-                                        }
-                                        _ => {}
-                                    }
-                                    continue 'frontier;
-                                } else {
-                                    let mut new_ranges = ranges.clone();
-                                    new_ranges.get_mut(&condition.category).unwrap().min =
-                                        condition.value + 1;
-                                    ranges.get_mut(&condition.category).unwrap().max =
-                                        condition.value;
-                                    match &rule.target {
-                                        Target::Accepted => {
-                                            accepted.push(new_ranges);
-                                        }
-                                        Target::Workflow(workflow) => {
-                                            frontier.push((new_ranges, workflow.clone()))
-                                        }
-                                        _ => {}
-                                    }
-                                }
-                            }
-                        }
-                        '<' => {
-                            if condition.value > range.min {
-                                if condition.value > range.max {
-                                    match &rule.target {
-                                        Target::Accepted => {
-                                            accepted.push(ranges.clone());
-                                        }
-                                        Target::Workflow(workflow) => {
-                                            frontier.push((ranges.clone(), workflow.clone()))
-                                        }
-                                        _ => {}
-                                    }
-                                    continue 'frontier;
-                                } else {
-                                    let mut new_ranges = ranges.clone();
-                                    new_ranges.get_mut(&condition.category).unwrap().max =
-                                        condition.value - 1;
-                                    ranges.get_mut(&condition.category).unwrap().min =
-                                        condition.value;
-                                    match &rule.target {
-                                        Target::Accepted => {
-                                            accepted.push(new_ranges);
-                                        }
-                                        Target::Workflow(workflow) => {
-                                            frontier.push((new_ranges, workflow.clone()))
-                                        }
-                                        _ => {}
-                                    }
-                                }
-                            }
-                        }
-                        '=' => {
-                            if condition.value == range.min {
-                                let mut new_ranges = ranges.clone();
-                                new_ranges.get_mut(&condition.category).unwrap().min =
-                                    condition.value + 1;
-                                ranges.get_mut(&condition.category).unwrap().max = condition.value;
-                                match &rule.target {
-                                    Target::Accepted => {
-                                        accepted.push(new_ranges);
-                                    }
-                                    Target::Workflow(workflow) => {
-                                        frontier.push((new_ranges, workflow.clone()))
-                                    }
-                                    _ => {}
-                                }
-                            } else if condition.value == range.max {
-                                let mut new_ranges = ranges.clone();
-                                new_ranges.get_mut(&condition.category).unwrap().max =
-                                    condition.value - 1;
-                                ranges.get_mut(&condition.category).unwrap().min = condition.value;
-                                match &rule.target {
-                                    Target::Accepted => {
-                                        accepted.push(new_ranges);
-                                    }
-                                    Target::Workflow(workflow) => {
-                                        frontier.push((new_ranges, workflow.clone()))
-                                    }
-                                    _ => {}
-                                }
-                            } else if condition.value > range.min && condition.value < range.max {
-                                let mut greater_range = ranges.clone();
-                                greater_range.get_mut(&condition.category).unwrap().min =
-                                    condition.value + 1;
-                                frontier.push((greater_range, workflow_name.clone()));
-                                ranges.get_mut(&condition.category).unwrap().max =
-                                    condition.value - 1;
-                                let mut equal_range = ranges.clone();
-                                {
-                                    let range = equal_range.get_mut(&condition.category).unwrap();
-                                    range.min = condition.value;
-                                    range.max = condition.value;
-                                }
-                                match &rule.target {
-                                    Target::Accepted => {
-                                        accepted.push(equal_range);
-                                    }
-                                    Target::Workflow(workflow) => {
-                                        frontier.push((equal_range, workflow.clone()));
-                                    }
-                                    _ => {}
-                                }
-                            }
-                        }
-                        _ => panic!(),
+                    if range.min < range.max
+                        && condition.value >= range.min
+                        && condition.value <= range.max
+                    {
+                        frontier.extend(
+                            [
+                                (condition.value > range.min)
+                                    .then_some((range.min, condition.value - 1)),
+                                (condition.value < range.max)
+                                    .then_some((condition.value + 1, range.max)),
+                                Some((condition.value, condition.value)),
+                            ]
+                            .into_iter()
+                            .flatten()
+                            .map(|(min, max)| {
+                                (
+                                    {
+                                        let mut new_ranges = ranges.clone();
+                                        new_ranges.insert(condition.category, Range { min, max });
+                                        new_ranges
+                                    },
+                                    workflow_name.clone(),
+                                )
+                            }),
+                        );
+                        continue 'frontier;
                     }
-                } else {
+
+                    result = range.max.cmp(&condition.value) == condition.operand;
+                }
+
+                if result {
                     match &rule.target {
-                        Target::Accepted => accepted.push(ranges),
-                        Target::Rejected => continue 'frontier,
-                        Target::Workflow(new_workflow) => {
-                            frontier.push((ranges, new_workflow.clone()))
-                        }
+                        Target::Accepted => accepted.push(ranges.clone()),
+                        Target::Rejected => {}
+                        Target::Workflow(wkflow) => frontier.push((ranges, wkflow.to_string())),
                     }
-                    break;
+                    continue 'frontier;
                 }
             }
         }
