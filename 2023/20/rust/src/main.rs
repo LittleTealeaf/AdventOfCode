@@ -114,6 +114,7 @@ impl Solution {
         high_pulses * low_pulses
     }
 
+    // TODO: either run this fully, or implement better method
     fn part_2(&self) -> usize {
         let mut modules = self.modules.clone();
         modules.insert(
