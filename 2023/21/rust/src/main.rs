@@ -119,7 +119,7 @@ impl Solution {
             .find_map(|(pos, tile)| matches!(tile, Tile::Start).then_some(pos))
             .unwrap()]);
 
-        for _ in 0..26501365 {
+        for _ in 0..26_501_365 {
             positions = HashSet::<Pos<i64>, RandomState>::from_iter(
                 positions
                     .into_iter()
