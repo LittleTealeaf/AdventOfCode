@@ -91,6 +91,10 @@ impl Solution {
             .count()
     }
 
+
+    // TODO: Create a search algorithm that keeps track of the visited steps (except ones that have
+    // all steps around it visited), and each time you visit a new state add it to one of two
+    // alternating counts
     #[allow(clippy::unnecessary_lazy_evaluations)]
     fn part_2(&self) -> usize {
         let width = self.map[0].len();
