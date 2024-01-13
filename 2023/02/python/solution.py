@@ -35,7 +35,6 @@ def part_2(lines: list[str]):
 
     for line in lines:
         split_1 = line.split(sep=":")
-        game = int(split_1[0].split(" ")[1])
 
         maxs: dict[str, int] = {}
         observations = split_1[1].replace(";", ",").split(", ")
