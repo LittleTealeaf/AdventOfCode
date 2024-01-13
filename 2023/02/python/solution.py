@@ -15,8 +15,8 @@ def part_1(lines: list[str]):
 
         for observation in observations:
             tokens = observation.split(" ")
-            if tokens[0] == '':
-                tokens.remove('')
+            if tokens[0] == "":
+                tokens.remove("")
             count = int(tokens[0])
             actual = int(tokens[1])
 
@@ -29,6 +29,7 @@ def part_1(lines: list[str]):
 
     return total
 
+
 def part_2(lines: list[str]):
     total = 0
 
@@ -40,8 +41,8 @@ def part_2(lines: list[str]):
         observations = split_1[1].replace(";", ",").split(", ")
         for observation in observations:
             tokens = observation.split(" ")
-            if tokens[0] == '':
-                tokens.remove('')
+            if tokens[0] == "":
+                tokens.remove("")
             count = int(tokens[0])
             color = tokens[1]
 
@@ -53,9 +54,8 @@ def part_2(lines: list[str]):
             product *= maxs[value]
 
         total += product
-    
-    return total
 
+    return total
 
 
 if __name__ == "__main__":
