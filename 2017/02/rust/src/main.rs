@@ -1,6 +1,6 @@
-fn part_1(spreadsheet: &Vec<Vec<i32>>) -> u32 {
+fn part_1(spreadsheet: &[Vec<i32>]) -> u32 {
     spreadsheet
-        .into_iter()
+        .iter()
         .map(|row| {
             row.iter()
                 .max()
@@ -10,9 +10,9 @@ fn part_1(spreadsheet: &Vec<Vec<i32>>) -> u32 {
         .sum()
 }
 
-fn part_2(spreadsheet: &Vec<Vec<i32>>) -> i32 {
+fn part_2(spreadsheet: &[Vec<i32>]) -> i32 {
     spreadsheet
-        .into_iter()
+        .iter()
         .map(|row| {
             for i in 0..row.len() {
                 for j in 0..row.len() {
@@ -21,7 +21,7 @@ fn part_2(spreadsheet: &Vec<Vec<i32>>) -> i32 {
                     }
                 }
             }
-            return 0;
+            0
         })
         .sum()
 }
@@ -30,7 +30,7 @@ fn main() {
     let spreadsheet = include_str!("../../input.txt")
         .lines()
         .map(|line| {
-            line.split("\t")
+            line.split('\t')
                 .filter_map(|token| token.trim().parse::<i32>().ok())
                 .collect::<Vec<_>>()
         })

@@ -1,4 +1,4 @@
-fn part_1(values: &Vec<u32>) -> u32 {
+fn part_1(values: &[u32]) -> u32 {
     let mut sum = 0;
     for i in 0..values.len() {
         if values[i] == values[(i + 1) % values.len()] {
@@ -9,7 +9,7 @@ fn part_1(values: &Vec<u32>) -> u32 {
     sum
 }
 
-fn part_2(values: &Vec<u32>) -> u32 {
+fn part_2(values: &[u32]) -> u32 {
     let mut sum = 0;
     for i in 0..values.len() {
         if values[i] == values[(i + values.len() / 2) % values.len()] {
