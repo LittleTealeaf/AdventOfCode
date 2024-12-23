@@ -1,6 +1,7 @@
 fn main() {
     let solution = Solution::new(include_str!("../../input.txt"));
     println!("Part 1: {}", solution.part_1());
+    println!("Part 2: {}", solution.part_2());
 }
 
 #[derive(Debug)]
@@ -24,18 +25,36 @@ impl Solution {
 }
 
 impl Solution {
+    fn is_safe(report: &[i32]) -> bool {
+        let diff: Vec<_> = report
+            .windows(2)
+            .map(|window| window[1] - window[0])
+            .collect();
+
+        !diff.contains(&0)
+            && (diff.iter().all(|i| (&1..=&3).contains(&i))
+                || diff.iter().all(|i| (&-3..=&-1).contains(&i)))
+    }
+
     fn part_1(&self) -> usize {
         self.reports
             .iter()
-            .filter(|report| {
-                let diff: Vec<_> = report
-                    .windows(2)
-                    .map(|window| window[1] - window[0])
-                    .collect();
+            .filter(|report| Solution::is_safe(report))
+            .count()
+    }
+}
 
-                !diff.contains(&0)
-                    && (diff.iter().all(|i| (&1..=&3).contains(&i))
-                        || diff.iter().all(|i| (&-3..=&-1).contains(&i)))
+impl Solution {
+    fn part_2(&self) -> usize {
+        self.reports
+            .iter()
+            .filter(|report| {
+                Solution::is_safe(report)
+                    || (0..report.len()).any(|i| {
+                        let mut rpt = (*report).clone();
+                        rpt.remove(i);
+                        Solution::is_safe(&rpt)
+                    })
             })
             .count()
     }
